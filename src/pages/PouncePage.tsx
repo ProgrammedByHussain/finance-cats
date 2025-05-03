@@ -133,7 +133,7 @@ export default function PouncePage() {
                 }`}
               >
                 <img
-                  src="/src/images/pounce_ok.png"
+                  src="/images/pounce_ok.png"
                   alt="Sir Pounce"
                   className="w-24 h-24 object-contain mr-4"
                 />
@@ -157,7 +157,7 @@ export default function PouncePage() {
                 name="Sir Pounce"
                 degree="M.Sc., Financial Planning"
                 school="London School of Economics"
-                schoolLogo="/src/images/lse_logo.png"
+                schoolLogo="/images/lse_logo.png"
               />
               <div className="flex justify-center mt-4 mb-4">
                 <Button variant="ghost" size="icon" onClick={toggleSpeech}>
@@ -236,8 +236,8 @@ export default function PouncePage() {
       {financialData && (
         <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
           <TalkingImage
-            imgIdle="/src/images/pounce_ok.png"
-            imgTalking="/src/images/pounce_talk.png"
+            imgIdle="/images/pounce_ok.png"
+            imgTalking="/images/pounce_talk.png"
           />
         </div>
       )}
