@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
@@ -32,12 +31,25 @@ interface DashboardProps {
 const COLORS = ['#E9967A', '#8A6D5F', '#FDE1D3', '#FEF7CD', '#8E9196'];
 
 export default function Dashboard({ data }: DashboardProps) {
+  console.log('Dashboard received data:', data);
+  
   if (!data) {
-    return null;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-catty-gray">Upload a CSV file to see your financial dashboard</p>
+      </div>
+    );
   }
 
   const totalExpenses = Object.values(data.expenses).reduce((sum, value) => sum + value, 0);
   const savings = data.income - totalExpenses;
+
+  console.log('Dashboard calculated values:', {
+    totalExpenses,
+    savings,
+    categories: data.categories,
+    transactions: data.transactions
+  });
 
   return (
     <div className="space-y-6">
@@ -137,7 +149,7 @@ export default function Dashboard({ data }: DashboardProps) {
               <div>
                 <p className="font-medium text-catty-brown">Highest spending category: {data.spendingInsights.highestCategory}</p>
                 <p className="text-sm text-catty-gray mt-1">
-                  This takes up approximately {Math.round((data.expenses[data.spendingInsights.highestCategory.toLowerCase()] / totalExpenses) * 100)}% of your monthly expenses.
+                  This takes up approximately {Math.round((data.expenses[data.spendingInsights.highestCategory] / totalExpenses) * 100)}% of your monthly expenses.
                 </p>
               </div>
             </div>

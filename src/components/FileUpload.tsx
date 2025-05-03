@@ -17,53 +17,93 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast: uiToast } = useToast();
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (selectedFile.type !== 'text/csv') {
+        toast.error('Please upload a CSV file');
+        return;
+      }
+      setFile(selectedFile);
+      setUploadStatus('File selected');
     }
   };
 
-  const handleUpload = async () => {
-    if (!file) {
-      toast.error("Please select a file first!");
-      return;
-    }
-
-    setIsUploading(true);
-    setUploadProgress(0);
-
+  const handleUpload = async (file: File) => {
     try {
+      setIsUploading(true);
+      setUploadStatus('Checking server connection...');
+      
+      // First, check if the server is running
+      const testResponse = await fetch('http://localhost:5002/api/test');
+      if (!testResponse.ok) {
+        throw new Error('Server is not responding. Please make sure the backend server is running.');
+      }
+      
+      setUploadStatus('Uploading file...');
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:5000/api/upload', {
+      console.log('Uploading file:', file.name);
+      const response = await fetch('http://localhost:5002/api/upload', {
         method: 'POST',
-        body: formData
+        body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json();
+        console.error('Upload error:', errorData);
+        throw new Error(errorData.error || 'Failed to upload file');
       }
 
-      toast.success("File uploaded successfully!");
-      setIsUploading(false);
-      setUploadProgress(100);
+      const data = await response.json();
+      console.log('Upload response:', data);
+      setUploadStatus('File uploaded successfully!');
+      setUploadedFile(data.filename);
+
+      // Simulate progress for analysis
+      setAnalysisProgress(0);
+      for (let i = 0; i <= 100; i += 10) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        setAnalysisProgress(i);
+      }
+
+      // Fetch analysis results
+      console.log('Requesting analysis...');
+      const analysisResponse = await fetch('http://localhost:5002/api/analyze');
+      if (!analysisResponse.ok) {
+        const errorData = await analysisResponse.json();
+        console.error('Analysis error:', errorData);
+        throw new Error(errorData.error || 'Failed to analyze file');
+      }
+
+      const analysisData = await analysisResponse.json();
+      console.log('Analysis data received:', analysisData);
       
-      // Simulate processing
-      setTimeout(() => {
-        const mockData = generateMockFinancialData();
-        onFileUploaded(mockData);
-        uiToast({
-          title: "Bank Statement Analyzed!",
-          description: "Whiskers has reviewed your financial data."
-        });
-      }, 1500);
+      if (!analysisData || !analysisData.transactions || analysisData.transactions.length === 0) {
+        throw new Error('No valid data found in the file. Please try again with a different CSV file.');
+      }
+
+      setAnalysisResults(analysisData);
+      setAnalysisProgress(100);
+      setUploadStatus('Analysis complete!');
+
+      // Pass the analysis data to the parent component
+      console.log('Calling onFileUploaded with:', analysisData);
+      onFileUploaded(analysisData);
+      setIsUploading(false);
 
     } catch (error) {
-      console.error('Error uploading file:', error);
-      toast.error("Error uploading the file. Please try again.");
+      console.error('Error:', error);
+      setUploadStatus(`Error: ${error.message}`);
+      setAnalysisProgress(0);
       setIsUploading(false);
+      toast.error(error.message || "Error processing the file. Please try again.");
     }
   };
 
@@ -72,6 +112,10 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
       <h2 className="text-xl font-semibold text-catty-brown mb-4">Upload Your Bank Statement</h2>
       <p className="text-catty-gray mb-6">
         Upload a CSV file of your bank statement for Whiskers to analyze your finances.
+        <br />
+        <span className="text-sm text-catty-orange">
+          Any CSV file with financial data will work - we'll analyze it automatically!
+        </span>
       </p>
 
       <div className="space-y-4">
@@ -109,13 +153,13 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
         {isUploading ? (
           <div className="space-y-2">
             <Progress value={uploadProgress} className="h-2" />
-            <p className="text-xs text-center text-catty-gray">Uploading... {uploadProgress}%</p>
+            <p className="text-xs text-center text-catty-gray">{uploadStatus}</p>
           </div>
         ) : (
           <Button
-            onClick={handleUpload} 
+            onClick={() => file && handleUpload(file)} 
             className="w-full bg-catty-orange hover:bg-catty-brown text-white"
-            disabled={!file}
+            disabled={!file || isUploading}
           >
             Upload Statement
           </Button>

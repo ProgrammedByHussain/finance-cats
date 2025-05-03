@@ -21,13 +21,14 @@ export default function PouncePage() {
   }, []);
 
   const handleFileUploaded = (data: any) => {
+    console.log('Received data from FileUpload:', data);
     setFinancialData(data);
 
     // Generate cat advice based on the data
     const tips = [
-      `Meow! I notice you're spending $${data.expenses.food} on food. Purr-haps you could save by cooking more at home?`,
-      `Your biggest expense is ${data.spendingInsights.highestCategory}. Maybe it's time to pounce on some savings there!`,
-      `You're saving ${data.savingsRate}% of your income. Let's try to improve that to 20%! That would be the cat's meow!`,
+      `Meow! I notice you're spending $${data.expenses?.food || 0} on food. Purr-haps you could save by cooking more at home?`,
+      `Your biggest expense is ${data.spendingInsights?.highestCategory || 'unknown'}. Maybe it's time to pounce on some savings there!`,
+      `You're saving ${data.savingsRate || 0}% of your income. Let's try to improve that to 20%! That would be the cat's meow!`,
       `I see some unusual expenses in entertainment. Remember, the best things in life are free, like napping in sunbeams!`,
       `Your spending on shopping seems a bit high. Try to pause before purchasing - ask if you really need it, or if you're just chasing a shiny object!`,
     ];
