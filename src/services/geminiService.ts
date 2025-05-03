@@ -10,6 +10,12 @@ interface CreditCardRecommendation {
   imageUrl?: string;
 }
 
+interface InvestmentRecommendation {
+  type: string;
+  suggestions: string[];
+  allocation: string;
+}
+
 // Get API key from environment variables
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -68,6 +74,99 @@ export async function getCreditCardRecommendations(
     return cards;
   } catch (error) {
     console.error("Error fetching credit card recommendations:", error);
+    throw error;
+  }
+}
+
+export async function getInvestmentRecommendations(
+  investmentAmount: number,
+  riskTolerance: number[],
+  investmentGoal: string,
+  timeHorizon: string
+): Promise<{
+  portfolioAllocation: { name: string; value: number }[];
+  annualReturn: number;
+  totalReturn: number;
+  profit: number;
+  years: number;
+  recommendations: InvestmentRecommendation[];
+}> {
+  // Construct the prompt for Gemini
+  const prompt = `You are Dr. Clawdia, a cat financial advisor specializing in investments. 
+    Based on the following user preferences, provide a detailed investment plan:
+    
+    Investment Amount: $${investmentAmount}
+    Risk Tolerance: ${riskTolerance[0]}/10
+    Investment Goal: ${investmentGoal}
+    Time Horizon: ${timeHorizon} (short = 1-3 years, medium = 3-7 years, long = 7+ years)
+    
+    IMPORTANT INSTRUCTIONS FOR CALCULATIONS:
+    1. The "portfolioAllocation" should contain percentage values that add up to 100%.
+    2. The "annualReturn" should be a realistic percentage return based on the risk profile (typically 3-10%).
+    3. For calculating "totalReturn", use compound interest formula: Investment * (1 + annualReturn/100)^years
+    4. The "profit" MUST be calculated as: totalReturn - investmentAmount
+    5. The "years" should be set based on timeHorizon: short=3, medium=5, long=10
+    6. All dollar values should be rounded to whole numbers
+    7. Ensure mathematical consistency: profit = totalReturn - investmentAmount
+    
+    Format your response as valid JSON with this structure:
+    {
+      "portfolioAllocation": [
+        {"name": "Stocks", "value": X},  // X is a percentage (e.g. 60 for 60%)
+        {"name": "Bonds", "value": Y},   // Y is a percentage (e.g. 30 for 30%)
+        {"name": "Alternatives", "value": Z}  // Z is a percentage (e.g. 10 for 10%)
+      ],
+      "annualReturn": 7,  // Percentage (e.g. 7 for 7%)
+      "totalReturn": 1970,  // Total value after growth (investment + profit)
+      "profit": 970,  // Amount gained (totalReturn - investmentAmount)
+      "years": 10,  // Number of years based on timeHorizon
+      "recommendations": [
+        {
+          "type": "Stocks",
+          "suggestions": ["Specific investment 1", "Specific investment 2"],
+          "allocation": "60%"  // Should match the percentage in portfolioAllocation
+        },
+        {
+          "type": "Bonds",
+          "suggestions": ["Specific investment 1", "Specific investment 2"],
+          "allocation": "30%"
+        },
+        {
+          "type": "Alternatives",
+          "suggestions": ["Specific investment 1", "Specific investment 2"],
+          "allocation": "10%"
+        }
+      ]
+    }`;
+
+  try {
+    // Call Gemini API
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const text = response.text();
+
+    // Parse the JSON response
+    // Find the JSON part of the response (in case there's surrounding text)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("No valid JSON found in the response");
+    }
+
+    const investmentPlan = JSON.parse(jsonMatch[0]);
+
+    // Validate the response to ensure mathematical consistency
+    if (
+      investmentPlan.totalReturn - investmentAmount !==
+      investmentPlan.profit
+    ) {
+      // Fix the calculation if it's inconsistent
+      investmentPlan.profit = investmentPlan.totalReturn - investmentAmount;
+    }
+
+    return investmentPlan;
+  } catch (error) {
+    console.error("Error fetching investment recommendations:", error);
     throw error;
   }
 }
