@@ -12,7 +12,12 @@ import InvestmentDashboard from "@/components/InvestmentDashboard";
 import { getInvestmentRecommendations } from "@/services/geminiService";
 import { Loader2, AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
+import {
+  playCatSpeech,
+  stopAllSpeech,
+  preloadCatSpeech,
+  AudioManager,
+} from "@/services/elevenlabsService";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
 
 export default function ClawdiaPage() {
@@ -27,6 +32,8 @@ export default function ClawdiaPage() {
   const [apiData, setApiData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSpeechMuted, setIsSpeechMuted] = useState(false);
+  const [preloadedSpeech, setPreloadedSpeech] =
+    useState<HTMLAudioElement | null>(null);
 
   // trigger animations & cleanup
   useEffect(() => {
@@ -39,21 +46,43 @@ export default function ClawdiaPage() {
   // play TTS when results arrive
   useEffect(() => {
     if (showResults && !isSpeechMuted && apiData) {
-      let speech = `Greetings, I'm Doctor Clawdia. `;
-      speech += `I've created an investment portfolio tailored to your ${investmentGoal} goal and a ${riskTolerance[0]}/10 risk tolerance. `;
+      if (preloadedSpeech) {
+        // Play the preloaded audio immediately
+        const audioManager = AudioManager.getInstance();
+        audioManager.playAudio(preloadedSpeech);
+        setPreloadedSpeech(null); // Clear the reference
+      } else {
+        // Fall back to the old method if preloading failed
+        let speech = `Greetings, I'm Doctor Clawdia. `;
+        speech += `I've created an investment portfolio tailored to your ${investmentGoal} goal and a ${riskTolerance[0]}/10 risk tolerance. `;
 
-      if (apiData.portfolioAllocation) {
-        const top = [...apiData.portfolioAllocation].sort((a, b) => b.value - a.value)[0];
-        speech += `I've allocated ${top.value}% to ${top.name}. `;
-        if (apiData.annualReturn) {
-          speech += `Projected annual return is ${apiData.annualReturn}%, growing $${investmentAmount} to $${Math.round(apiData.totalReturn)} over ${apiData.years} years. `;
+        if (apiData.portfolioAllocation) {
+          const top = [...apiData.portfolioAllocation].sort(
+            (a, b) => b.value - a.value
+          )[0];
+          speech += `I've allocated ${top.value}% to ${top.name}. `;
+          if (apiData.annualReturn) {
+            speech += `Projected annual return is ${
+              apiData.annualReturn
+            }%, growing $${investmentAmount} to $${Math.round(
+              apiData.totalReturn
+            )} over ${apiData.years} years. `;
+          }
         }
-      }
 
-      speech += `Let's review the plan!`;
-      playCatSpeech("clawdia", speech);
+        speech += `Let's review the plan!`;
+        // playCatSpeech("clawdia", speech);
+      }
     }
-  }, [showResults, isSpeechMuted, apiData]);
+  }, [
+    showResults,
+    isSpeechMuted,
+    apiData,
+    preloadedSpeech,
+    investmentGoal,
+    riskTolerance,
+    investmentAmount,
+  ]);
 
   // scroll to top when results are shown
   useEffect(() => {
@@ -73,6 +102,32 @@ export default function ClawdiaPage() {
         investmentGoal,
         timeHorizon
       );
+
+      // Preload speech while waiting for the results
+      if (!isSpeechMuted) {
+        let speech = `Greetings, I'm Doctor Clawdia. `;
+        speech += `I've created an investment portfolio tailored to your ${investmentGoal} goal and a ${riskTolerance[0]}/10 risk tolerance. `;
+
+        if (plan.portfolioAllocation) {
+          const top = [...plan.portfolioAllocation].sort(
+            (a, b) => b.value - a.value
+          )[0];
+          speech += `I've allocated ${top.value}% to ${top.name}. `;
+          if (plan.annualReturn) {
+            speech += `Projected annual return is ${
+              plan.annualReturn
+            }%, growing $${investmentAmount} to $${Math.round(
+              plan.totalReturn
+            )} over ${plan.years} years. `;
+          }
+        }
+
+        speech += `Let's review the plan!`;
+
+        const audio = await preloadCatSpeech("clawdia", speech);
+        setPreloadedSpeech(audio);
+      }
+
       setApiData(plan);
       setShowResults(true);
     } catch {
@@ -208,16 +263,21 @@ export default function ClawdiaPage() {
                   id="investmentAmount"
                   type="number"
                   value={investmentAmount}
-                  onChange={e => setInvestmentAmount(+e.target.value)}
+                  onChange={(e) => setInvestmentAmount(+e.target.value)}
                   className="max-w-[180px]"
                 />
               </div>
             </CardContent>
           </Card>
 
-          <Card className={`mb-6 ${animate ? "clawdia-card" : "opacity-0"}`} style={{animationDelay:"0.5s"}}>
+          <Card
+            className={`mb-6 ${animate ? "clawdia-card" : "opacity-0"}`}
+            style={{ animationDelay: "0.5s" }}
+          >
             <CardHeader>
-              <CardTitle className="text-xl text-catty-brown">Risk tolerance</CardTitle>
+              <CardTitle className="text-xl text-catty-brown">
+                Risk tolerance
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4 stagger-appear">
@@ -239,7 +299,10 @@ export default function ClawdiaPage() {
             </CardContent>
           </Card>
 
-          <Card className={`mb-6 ${animate ? "clawdia-card" : "opacity-0"}`} style={{animationDelay:"0.7s"}}>
+          <Card
+            className={`mb-6 ${animate ? "clawdia-card" : "opacity-0"}`}
+            style={{ animationDelay: "0.7s" }}
+          >
             <CardHeader>
               <CardTitle className="text-xl text-catty-brown">
                 Primary goal
@@ -252,11 +315,11 @@ export default function ClawdiaPage() {
                 className="stagger-appear"
               >
                 {[
-                  ["retirement","Retirement"],
-                  ["education","Education Fund"],
-                  ["house","Home Purchase"],
-                  ["wealth","Wealth Building"]
-                ].map(([val,label]) => (
+                  ["retirement", "Retirement"],
+                  ["education", "Education Fund"],
+                  ["house", "Home Purchase"],
+                  ["wealth", "Wealth Building"],
+                ].map(([val, label]) => (
                   <div key={val} className="flex items-center space-x-2 mb-4">
                     <RadioGroupItem value={val} id={val} />
                     <Label htmlFor={val}>{label}</Label>
@@ -266,7 +329,10 @@ export default function ClawdiaPage() {
             </CardContent>
           </Card>
 
-          <Card className={`mb-8 ${animate ? "clawdia-card" : "opacity-0"}`} style={{animationDelay:"0.9s"}}>
+          <Card
+            className={`mb-8 ${animate ? "clawdia-card" : "opacity-0"}`}
+            style={{ animationDelay: "0.9s" }}
+          >
             <CardHeader>
               <CardTitle className="text-xl text-catty-brown">
                 Time horizon
@@ -279,10 +345,10 @@ export default function ClawdiaPage() {
                 className="stagger-appear"
               >
                 {[
-                  ["short","Short (1-3 yrs)"],
-                  ["medium","Medium (3-7 yrs)"],
-                  ["long","Long (7+ yrs)"]
-                ].map(([val,label]) => (
+                  ["short", "Short (1-3 yrs)"],
+                  ["medium", "Medium (3-7 yrs)"],
+                  ["long", "Long (7+ yrs)"],
+                ].map(([val, label]) => (
                   <div key={val} className="flex items-center space-x-2 mb-4">
                     <RadioGroupItem value={val} id={val} />
                     <Label htmlFor={val}>{label}</Label>
@@ -292,7 +358,11 @@ export default function ClawdiaPage() {
             </CardContent>
           </Card>
 
-          <div className={`flex justify-between ${animate?"stagger-appear":"opacity-0"}`}>
+          <div
+            className={`flex justify-between ${
+              animate ? "stagger-appear" : "opacity-0"
+            }`}
+          >
             <Button
               onClick={() => navigate("/")}
               variant="outline"

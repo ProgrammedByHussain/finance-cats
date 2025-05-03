@@ -148,6 +148,22 @@ export async function generateSpeech(
   }
 }
 
+export async function preloadCatSpeech(
+  advisor: CatAdvisor,
+  customText?: string
+): Promise<HTMLAudioElement | null> {
+  const text = customText || SPEECH_TEMPLATES[advisor];
+  const voiceId = VOICES[advisor];
+
+  try {
+    const audio = await generateSpeech(text, voiceId);
+    return audio;
+  } catch (error) {
+    console.error(`Error preloading speech for ${advisor}:`, error);
+    return null;
+  }
+}
+
 export async function playCatSpeech(
   advisor: CatAdvisor,
   customText?: string

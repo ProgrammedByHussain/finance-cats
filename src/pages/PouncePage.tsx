@@ -8,7 +8,12 @@ import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
-import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
+import {
+  playCatSpeech,
+  stopAllSpeech,
+  preloadCatSpeech,
+  AudioManager,
+} from "@/services/elevenlabsService";
 
 export default function PouncePage() {
   const navigate = useNavigate();
@@ -21,6 +26,8 @@ export default function PouncePage() {
   );
   const [error, setError] = useState<string | null>(null);
   const [isSpeechMuted, setIsSpeechMuted] = useState(false);
+  const [preloadedSpeech, setPreloadedSpeech] =
+    useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     // Trigger animation after component mount
@@ -35,55 +42,67 @@ export default function PouncePage() {
   // Play speech when financial data is available
   useEffect(() => {
     if (financialData && !isSpeechMuted) {
-      // Generate a custom message based on financial data
-      let speechText = `Meow there! Sir Pounce at your service. `;
-
-      if (financialData.spendingInsights) {
-        const { highestCategory, savingsTips } = financialData.spendingInsights;
-        speechText += `I've analyzed your spending habits and found some interesting patterns. `;
-        speechText += `Your highest spending category is ${highestCategory}. `;
-
-        if (savingsTips && savingsTips.length > 0) {
-          speechText += `Here's a tip: ${savingsTips[0]} `;
-        }
-
-        speechText += `Your current savings rate is ${financialData.savingsRate}%. `;
-
-        if (financialData.savingsRate < 20) {
-          speechText += `I recommend trying to save at least 20% of your income for better financial security.`;
-        } else {
-          speechText += `Great job on your savings! Keep up the good work!`;
-        }
+      if (preloadedSpeech) {
+        // Play the preloaded audio immediately
+        const audioManager = AudioManager.getInstance();
+        audioManager.playAudio(preloadedSpeech);
+        setPreloadedSpeech(null); // Clear the reference
       } else {
-        speechText += `I've analyzed your spending patterns and have some suggestions to optimize your budget!`;
+        // Fall back to the old method if preloading failed
+        // playCatSpeech("pounce", catAdvice);
       }
-
-      playCatSpeech("pounce", speechText);
     }
-  }, [financialData, isSpeechMuted]);
+  }, [financialData, isSpeechMuted, preloadedSpeech, catAdvice]);
+
   // --- HANDLER: upload CSV ---
-  const handleFileUploaded = (data: any) => {
+  const handleFileUploaded = async (data: any) => {
     if (!data) {
-      setError("Unable to analyze the CSV data. Please try another file format.");
+      setError(
+        "Unable to analyze the CSV data. Please try another file format."
+      );
       return;
     }
-    setFinancialData(data);
+
     // generate advice
     try {
       const highest = data.spendingInsights?.highestCategory || "unknown";
       const tips = data.spendingInsights?.savingsTips || [];
-      const tip = tips.length
-        ? tips[Math.floor(Math.random() * tips.length)]
-        : "Meow! Try to set aside a little more each month for savings!";
 
-      setCatAdvice(
-        `Meow! I notice your highest spending is in ${highest}. Purr-haps you could consider this tip: ${tip}`
-      );
+      let advice = `Meow there! Sir Pounce at your service. `;
+
+      if (data.spendingInsights) {
+        advice += `I've analyzed your spending habits and found some interesting patterns. `;
+        advice += `Your highest spending category is ${highest}. `;
+
+        if (tips && tips.length > 0) {
+          advice += `Here's a tip: ${tips[0]} `;
+        }
+
+        advice += `Your current savings rate is ${data.savingsRate}%. `;
+
+        if (data.savingsRate < 20) {
+          advice += `I recommend trying to save at least 20% of your income for better financial security.`;
+        } else {
+          advice += `Great job on your savings! Keep up the good work!`;
+        }
+      } else {
+        advice += `I've analyzed your spending patterns and have some suggestions to optimize your budget!`;
+      }
+
+      setCatAdvice(advice);
+
+      // Start preloading the speech immediately, while still processing data
+      if (!isSpeechMuted) {
+        const audio = await preloadCatSpeech("pounce", advice);
+        setPreloadedSpeech(audio);
+      }
     } catch {
       setCatAdvice(
         "Meow! I've analyzed your spending, but I'm having trouble coming up with specific advice. Let's work on your budget together!"
       );
     }
+
+    setFinancialData(data);
   };
 
   // --- HANDLER: toggle mute/unmute ---
@@ -103,7 +122,6 @@ export default function PouncePage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
-
           {/* TOP BAR: header + volume button */}
           <div className="flex items-center justify-between mb-6">
             {!financialData && (
@@ -133,13 +151,13 @@ export default function PouncePage() {
           {/* CREDENTIALS PLAQUE */}
           {financialData && (
             <>
-            <CatCredentialsPlaque
-              name="Sir Pounce"
-              degree="M.Sc., Financial Planning"
-              school="London School of Economics"
-              schoolLogo="/src/images/lse_logo.png"
-            />
-          <div className="flex justify-center mt-4 mb-4">
+              <CatCredentialsPlaque
+                name="Sir Pounce"
+                degree="M.Sc., Financial Planning"
+                school="London School of Economics"
+                schoolLogo="/src/images/lse_logo.png"
+              />
+              <div className="flex justify-center mt-4 mb-4">
                 <Button variant="ghost" size="icon" onClick={toggleSpeech}>
                   {isSpeechMuted ? (
                     <VolumeX className="h-6 w-6 text-catty-gray" />
@@ -148,7 +166,7 @@ export default function PouncePage() {
                   )}
                 </Button>
               </div>
-          </>
+            </>
           )}
 
           {error && (
@@ -211,7 +229,6 @@ export default function PouncePage() {
           )}
         </div>
       </div>
-
 
       {/* FLOATING FLAVOR IMAGE */}
       {financialData && (

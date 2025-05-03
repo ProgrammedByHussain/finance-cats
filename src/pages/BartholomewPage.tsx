@@ -11,7 +11,12 @@ import { getCreditCardRecommendations } from "@/services/geminiService";
 import { CreditCardRecommendation } from "@/components/CreditCardRecommendation";
 import { Loader2, AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
+import {
+  playCatSpeech,
+  stopAllSpeech,
+  preloadCatSpeech,
+  AudioManager,
+} from "@/services/elevenlabsService";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
 
 export default function BartholomewPage() {
@@ -32,6 +37,8 @@ export default function BartholomewPage() {
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSpeechMuted, setIsSpeechMuted] = useState(false);
+  const [preloadedSpeech, setPreloadedSpeech] =
+    useState<HTMLAudioElement | null>(null);
 
   // initial animation & cleanup
   useEffect(() => {
@@ -44,18 +51,26 @@ export default function BartholomewPage() {
   // play speech when results appear
   useEffect(() => {
     if (showResults && !isSpeechMuted) {
-      let speechText = `Hello there! I'm Doctor Bartholomeow, your credit card expert. `;
-      if (recommendations.length > 0) {
-        speechText += `Based on your preferences, I've found ${recommendations.length} purr-fect options for you. `;
-        speechText += `My top recommendation is the ${recommendations[0].name}. `;
-        speechText += `This card ${recommendations[0].description.toLowerCase()} `;
-        speechText += `and offers benefits like ${recommendations[0].benefits[0].toLowerCase()}.`;
+      if (preloadedSpeech) {
+        // Play the preloaded audio immediately
+        const audioManager = AudioManager.getInstance();
+        audioManager.playAudio(preloadedSpeech);
+        setPreloadedSpeech(null); // Clear the reference
       } else {
-        speechText += `I've analyzed your preferences and have some paw-some recommendations for you!`;
+        // Fall back to the old method if preloading failed
+        let speechText = `Hello there! I'm Doctor Bartholomeow, your credit card expert. `;
+        if (recommendations.length > 0) {
+          speechText += `Based on your preferences, I've found ${recommendations.length} purr-fect options for you. `;
+          speechText += `My top recommendation is the ${recommendations[0].name}. `;
+          speechText += `This card ${recommendations[0].description.toLowerCase()} `;
+          speechText += `and offers benefits like ${recommendations[0].benefits[0].toLowerCase()}.`;
+        } else {
+          speechText += `I've analyzed your preferences and have some paw-some recommendations for you!`;
+        }
+        // playCatSpeech("bartholomew", speechText);
       }
-      playCatSpeech("bartholomew", speechText);
     }
-  }, [showResults, isSpeechMuted, recommendations]);
+  }, [showResults, isSpeechMuted, recommendations, preloadedSpeech]);
 
   // scroll to top when results are shown
   useEffect(() => {
@@ -65,7 +80,7 @@ export default function BartholomewPage() {
   }, [showResults]);
 
   const handleCategoryChange = (category: string) => {
-    setSpendingCategories(prev => ({
+    setSpendingCategories((prev) => ({
       ...prev,
       [category]: !prev[category as keyof typeof prev],
     }));
@@ -80,6 +95,23 @@ export default function BartholomewPage() {
         spendingCategories,
         cardGoal
       );
+
+      // Preload speech while waiting for the results
+      if (!isSpeechMuted) {
+        let speechText = `Hello there! I'm Doctor Bartholomeow, your credit card expert. `;
+        if (cards.length > 0) {
+          speechText += `Based on your preferences, I've found ${cards.length} purr-fect options for you. `;
+          speechText += `My top recommendation is the ${cards[0].name}. `;
+          speechText += `This card ${cards[0].description.toLowerCase()} `;
+          speechText += `and offers benefits like ${cards[0].benefits[0].toLowerCase()}.`;
+        } else {
+          speechText += `I've analyzed your preferences and have some paw-some recommendations for you!`;
+        }
+
+        const audio = await preloadCatSpeech("bartholomew", speechText);
+        setPreloadedSpeech(audio);
+      }
+
       setRecommendations(cards);
       setShowResults(true);
     } catch (e) {
@@ -108,7 +140,6 @@ export default function BartholomewPage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
-
           {/* header + title + volume toggle (only before results) */}
           {!showResults && (
             <div
@@ -140,8 +171,8 @@ export default function BartholomewPage() {
                   </Button>
                 </div>
                 <p className="text-catty-gray mt-2">
-                  Let me help you find the purrfect Canadian credit card based on
-                  your spending habits and goals.
+                  Let me help you find the purrfect Canadian credit card based
+                  on your spending habits and goals.
                 </p>
               </div>
             </div>
@@ -190,13 +221,15 @@ export default function BartholomewPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 stagger-appear">
-                  {Object.keys(spendingCategories).map(category => (
+                  {Object.keys(spendingCategories).map((category) => (
                     <div key={category} className="flex items-center space-x-2">
                       <Checkbox
                         id={category}
-                        checked={spendingCategories[
-                          category as keyof typeof spendingCategories
-                        ]}
+                        checked={
+                          spendingCategories[
+                            category as keyof typeof spendingCategories
+                          ]
+                        }
                         onCheckedChange={() => handleCategoryChange(category)}
                       />
                       <Label htmlFor={category} className="capitalize">
@@ -310,7 +343,6 @@ export default function BartholomewPage() {
               </div>
             </div>
           )}
-
         </div>
       </div>
 
