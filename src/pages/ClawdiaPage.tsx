@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
 import { playMeowSound } from "@/utils/sound";
+import InvestmentDashboard from "@/components/InvestmentDashboard";
 
 export default function ClawdiaPage() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function ClawdiaPage() {
   const [investmentGoal, setInvestmentGoal] = useState("retirement");
   const [timeHorizon, setTimeHorizon] = useState("long");
   const [animate, setAnimate] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mount
@@ -24,39 +26,45 @@ export default function ClawdiaPage() {
 
   const handleSubmit = () => {
     playMeowSound();
-    // Process the investment data
-    console.log("Investment amount:", investmentAmount);
-    console.log("Risk tolerance:", riskTolerance[0]);
-    console.log("Investment goal:", investmentGoal);
-    console.log("Time horizon:", timeHorizon);
-
-    // Show results
-    let recommendation = "";
-
-    if (riskTolerance[0] <= 3) {
-      recommendation =
-        "a conservative portfolio with mostly bonds and some dividend stocks";
-    } else if (riskTolerance[0] <= 7) {
-      recommendation = "a balanced portfolio with a mix of stocks and bonds";
-    } else {
-      recommendation =
-        "an aggressive growth portfolio with mostly stocks and some alternative investments";
-    }
-
-    alert(
-      "Dr. Clawdia says: Based on your $" +
-        investmentAmount +
-        " investment amount, " +
-        riskTolerance[0] +
-        "/10 risk tolerance, " +
-        investmentGoal +
-        " goal, and " +
-        timeHorizon +
-        " time horizon, I recommend " +
-        recommendation +
-        "!"
-    );
+    setShowResults(true);
   };
+
+  if (showResults) {
+    return (
+      <div className="min-h-screen bg-catty-light-gray">
+        <Navbar />
+        <div className="container py-12 px-4 md:px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <img
+                  src="/src/images/clawdia_ok.png"
+                  alt="Dr. Clawdia"
+                  className="w-24 h-24 object-contain mr-4"
+                />
+                <div>
+                  <h1 className="text-3xl font-bold text-catty-brown">
+                    Your Investment Plan
+                  </h1>
+                  <p className="text-catty-gray mt-2">
+                    Based on your investment preferences and goals
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowResults(false)}
+                variant="outline"
+                className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
+              >
+                Edit Preferences
+              </Button>
+            </div>
+            <InvestmentDashboard data={{ investmentAmount, riskTolerance, investmentGoal, timeHorizon }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-catty-light-gray">

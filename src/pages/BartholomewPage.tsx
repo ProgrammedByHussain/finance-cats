@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useNavigate } from "react-router-dom";
 import { playMeowSound } from "@/utils/sound";
+import CreditCardDashboard from "@/components/CreditCardDashboard";
 
 export default function BartholomewPage() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function BartholomewPage() {
 
   const [cardGoal, setCardGoal] = useState("cashback");
   const [animate, setAnimate] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mount
@@ -36,23 +38,45 @@ export default function BartholomewPage() {
 
   const handleSubmit = () => {
     playMeowSound();
-    // Process the data here
-    console.log("Spending categories:", spendingCategories);
-    console.log("Card goal:", cardGoal);
-
-    // Show results
-    alert(
-      "Dr. Bartholameow says: Based on your spending habits and goals, I recommend a card with strong rewards in " +
-        Object.keys(spendingCategories)
-          .filter(
-            (key) => spendingCategories[key as keyof typeof spendingCategories]
-          )
-          .join(", ") +
-        " and focuses on " +
-        cardGoal +
-        "!"
-    );
+    setShowResults(true);
   };
+
+  if (showResults) {
+    return (
+      <div className="min-h-screen bg-catty-light-gray">
+        <Navbar />
+        <div className="container py-12 px-4 md:px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <img
+                  src="/src/images/barth_ok.png"
+                  alt="Dr. Bartholameow"
+                  className="w-24 h-24 object-contain mr-4"
+                />
+                <div>
+                  <h1 className="text-3xl font-bold text-catty-brown">
+                    Your Credit Card Recommendations
+                  </h1>
+                  <p className="text-catty-gray mt-2">
+                    Based on your spending habits and goals
+                  </p>
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowResults(false)}
+                variant="outline"
+                className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
+              >
+                Edit Preferences
+              </Button>
+            </div>
+            <CreditCardDashboard data={{ spendingCategories, cardGoal }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-catty-light-gray">
