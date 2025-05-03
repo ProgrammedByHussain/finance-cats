@@ -11,6 +11,7 @@ import { getCreditCardRecommendations } from "@/services/geminiService";
 import { CreditCardRecommendation } from "@/components/CreditCardRecommendation";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
 
 export default function BartholomewPage() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function BartholomewPage() {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCredentials, setShowCredentials] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mount
@@ -71,26 +73,37 @@ export default function BartholomewPage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
-          <div
-            className={`flex items-center mb-8 ${
-              animate ? "bartholomew-appear" : "opacity-0"
-            }`}
-          >
-            <img
-              src="/src/images/barth_ok.png"
-              alt="Dr. Bartholomeow"
-              className="w-24 h-24 object-contain mr-4"
-            />
-            <div>
-              <h1 className="text-3xl font-bold text-catty-brown">
-                Dr. Bartholomeow's Canadian Credit Card Advisor
-              </h1>
-              <p className="text-catty-gray mt-2">
-                Let me help you find the purrfect Canadian credit card based on
-                your spending habits and goals.
-              </p>
+          {!showResults && (
+            <div
+              className={`flex items-center mb-8 ${
+                animate ? "bartholomew-appear" : "opacity-0"
+              }`}
+            >
+              <img
+                src="/src/images/barth_ok.png"
+                alt="Dr. Bartholomeow"
+                className="w-24 h-24 object-contain mr-4"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-catty-brown">
+                  Dr. Bartholomeow's Credit Card Finder
+                </h1>
+                <p className="text-catty-gray mt-2">
+                  Let me help you find the purrfect Canadian credit card based on
+                  your spending habits and goals.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
+
+          {showResults && showCredentials && (
+            <CatCredentialsPlaque
+              name="Dr. Bartholomeow"
+              degree="Ph.D., Quantitative Finance & Risk Management"
+              school="University of Oxford"
+              schoolLogo="/src/images/oxford_logo.png"
+            />
+          )}
 
           {error && (
             <Alert variant="destructive" className="mb-6">
@@ -195,7 +208,7 @@ export default function BartholomewPage() {
             </>
           ) : (
             <div>
-              <h2 className="text-2xl font-bold text-catty-brown mb-6">
+              <h2 className="text-2xl font-bold text-catty-brown mb-6 mt-8">
                 Dr. Bartholomeow's Canadian Credit Card Recommendations
               </h2>
 
@@ -247,6 +260,7 @@ export default function BartholomewPage() {
             src="/src/images/barth_ok.png"
             alt="Dr. Bartholomeow"
             className="w-64 h-64 object-contain transform scale-150"
+            onLoad={() => setShowCredentials(true)}
           />
         </div>
       )}

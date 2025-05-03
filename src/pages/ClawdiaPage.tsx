@@ -12,6 +12,7 @@ import InvestmentDashboard from "@/components/InvestmentDashboard";
 import { getInvestmentRecommendations } from "@/services/geminiService";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
 
 export default function ClawdiaPage() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function ClawdiaPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiData, setApiData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showCredentials, setShowCredentials] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mount
@@ -64,15 +66,15 @@ export default function ClawdiaPage() {
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center">
-                <img
-                  src="/src/images/clawdia_ok.png"
-                  alt="Dr. Clawdia"
-                  className="w-24 h-24 object-contain mr-4"
-                />
                 <div>
-                  <h1 className="text-3xl font-bold text-catty-brown">
-                    Your Investment Plan
-                  </h1>
+                  {showCredentials && (
+                    <CatCredentialsPlaque
+                      name="Dr. Clawdia"
+                      degree="Ph.D., Credit Score Analytics & Portfolio Optimization"
+                      school="Stanford University"
+                      schoolLogo="/src/images/stanford_logo.png"
+                    />
+                  )}
                   <p className="text-catty-gray mt-2">
                     Based on your investment preferences and goals
                   </p>
@@ -112,6 +114,7 @@ export default function ClawdiaPage() {
             src="/src/images/clawdia_ok.png"
             alt="Dr. Clawdia"
             className="w-64 h-64 object-contain transform scale-150"
+            onLoad={() => setShowCredentials(true)}
           />
         </div>
       </div>

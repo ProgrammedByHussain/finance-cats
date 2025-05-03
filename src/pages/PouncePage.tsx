@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
 
 export default function PouncePage() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function PouncePage() {
     "Meow! Upload your spending history CSV, and I'll help you optimize your budget!"
   );
   const [error, setError] = useState<string | null>(null);
+  const [showCredentials, setShowCredentials] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mount
@@ -65,37 +67,48 @@ export default function PouncePage() {
   return (
     <div className="min-h-screen bg-catty-light-gray">
       <Navbar />
-
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
-          <div
-            className={`flex items-center mb-8 ${
-              animate ? "pounce-appear" : "opacity-0"
-            }`}
-          >
-            <img
-              src="/src/images/pounce_ok.png"
-              alt="Sir Pounce"
-              className="w-24 h-24 object-contain mr-4"
-            />
-            <div>
-              <h1 className="text-3xl font-bold text-catty-brown">
-                Sir Pounce's Budget Analyzer
-              </h1>
-              <p className="text-catty-gray mt-2">
-                Upload your bank statement CSV and I'll help you identify
-                savings opportunities with AI!
-              </p>
+          {/* --- START: Small cat image and description at the top (like Clawdia) --- */}
+          {!financialData && (
+            <div
+              className={`flex items-center mb-8 ${
+                animate ? "pounce-appear" : "opacity-0"
+              }`}
+            >
+              <img
+                src="/src/images/pounce_ok.png"
+                alt="Sir Pounce"
+                className="w-24 h-24 object-contain mr-4"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-catty-brown">
+                  Sir Pounce's Budget Optimizer
+                </h1>
+                <p className="text-catty-gray mt-2">
+                  Upload your bank statement CSV and I'll help you identify
+                  savings opportunities with AI!
+                </p>
+              </div>
             </div>
-          </div>
+          )}
+          {/* --- END: Small cat image and description --- */}
 
+          {/* --- Show credentials plaque at the top when results are shown --- */}
+          {financialData && showCredentials && (
+            <CatCredentialsPlaque
+              name="Sir Pounce"
+              degree="M.Sc., Financial Planning"
+              school="London School of Economics"
+              schoolLogo="/src/images/lse_logo.png"
+            />
+          )}
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
           {!financialData ? (
             <div
               className={`max-w-md mx-auto ${
@@ -112,7 +125,7 @@ export default function PouncePage() {
                 <Button
                   onClick={() => navigate("/")}
                   variant="outline"
-                  className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
+                  className="bg-white border-catty-orange text-catty-brown ho :bg-catty-peach"
                 >
                   Go Back Home
                 </Button>
@@ -161,6 +174,7 @@ export default function PouncePage() {
             src="/src/images/pounce_ok.png"
             alt="Sir Pounce"
             className="w-64 h-64 object-contain transform scale-150"
+            onLoad={() => setShowCredentials(true)}
           />
         </div>
       )}
