@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, CreditCard } from "lucide-react";
+import { Check, CreditCard, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface CreditCardRecommendationProps {
   name: string;
@@ -9,6 +10,7 @@ interface CreditCardRecommendationProps {
   annualFee: string;
   interestRate: string;
   imageUrl?: string;
+  url?: string;
 }
 
 export function CreditCardRecommendation({
@@ -18,7 +20,17 @@ export function CreditCardRecommendation({
   annualFee,
   interestRate,
   imageUrl,
+  url,
 }: CreditCardRecommendationProps) {
+  // Function to generate a search URL if no direct URL is provided
+  const getCardUrl = () => {
+    if (url) return url;
+    // Create a search URL using the card name
+    return `https://www.google.com/search?q=${encodeURIComponent(
+      name + " credit card canada"
+    )}`;
+  };
+
   return (
     <Card className="mb-4 border-2 border-catty-cream hover:border-catty-orange transition-all duration-300 bg-white">
       <CardHeader className="pb-2">
@@ -68,6 +80,17 @@ export function CreditCardRecommendation({
               <span className="font-medium text-catty-brown">APR:</span>{" "}
               <span>{interestRate}</span>
             </div>
+          </div>
+
+          <div className="mt-2 flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-catty-orange border-catty-orange hover:bg-catty-peach hover:text-catty-brown"
+              onClick={() => window.open(getCardUrl(), "_blank")}
+            >
+              Take Me There <ExternalLink className="ml-1" size={14} />
+            </Button>
           </div>
         </div>
       </CardContent>

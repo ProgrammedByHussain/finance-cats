@@ -38,6 +38,7 @@ interface FinancialAnalysis {
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
+// Modified geminiService.ts for generating URLs
 export async function getCreditCardRecommendations(
   spendingCategories: Record<string, boolean>,
   cardGoal: string
@@ -57,20 +58,22 @@ export async function getCreditCardRecommendations(
   IMPORTANT: Only recommend credit cards that are legitimately available for Canadians from actual Canadian banks or credit card issuers (e.g., RBC, TD, CIBC, Scotiabank, BMO, American Express Canada, Canadian Tire, PC Financial, Tangerine, etc.).
   
   For each card, provide:
-  1. The actual card name from a Canadian bank or issuer (with a cat pun in your description if possible, but keep the real card name)
+  1. The actual card name from a Canadian bank or issuer (with a cat pun in your description if possible, but keep the real card name and omit any '*')
   2. A brief description (1 sentence, starting with the word "Offers")
   3. 3 specific benefits that are accurate for this card and tailored to the user's preferences (each no more than 250 characters)
   4. The actual annual fee
   5. The accurate interest rate range
+  6. Include a direct URL to the card's application or information page if possible. If not, leave blank and a search URL will be generated.
   
   Format your response as valid JSON with this structure:
   [
     {
-      "name": "Real Card Name (from Canadian issuer, don't include any *'s)",
+      "name": "Real Card Name (from Canadian issuer)",
       "description": "Card description",
       "benefits": ["Benefit 1", "Benefit 2", "Benefit 3"],
       "annualFee": "$X",
-      "interestRate": "X% - Y% Variable APR"
+      "interestRate": "X% - Y% Variable APR",
+      "url": "https://example.com/card" 
     }
   ]`;
 

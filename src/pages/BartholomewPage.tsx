@@ -309,7 +309,11 @@ export default function BartholomewPage() {
             <div>
               <div className="space-y-6">
                 {recommendations.map((card, idx) => (
-                  <CreditCardRecommendation key={idx} {...card} />
+                  <CreditCardRecommendation
+                    key={idx}
+                    {...card}
+                    url={card.url}
+                  />
                 ))}
               </div>
 
