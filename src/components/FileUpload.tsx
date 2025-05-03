@@ -40,7 +40,7 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
       setUploadStatus('Checking server connection...');
       
       // First, check if the server is running
-      const testResponse = await fetch('http://localhost:5002/api/test');
+      const testResponse = await fetch('http://localhost:5003/api/test');
       if (!testResponse.ok) {
         throw new Error('Server is not responding. Please make sure the backend server is running.');
       }
@@ -50,7 +50,7 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
       formData.append('file', file);
 
       console.log('Uploading file:', file.name);
-      const response = await fetch('http://localhost:5002/api/upload', {
+      const response = await fetch('http://localhost:5003/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -75,7 +75,7 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
 
       // Fetch analysis results
       console.log('Requesting analysis...');
-      const analysisResponse = await fetch('http://localhost:5002/api/analyze');
+      const analysisResponse = await fetch('http://localhost:5003/api/analyze');
       if (!analysisResponse.ok) {
         const errorData = await analysisResponse.json();
         console.error('Analysis error:', errorData);

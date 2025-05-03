@@ -5,7 +5,7 @@ const cors = require('cors');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 5003;
 
 // Enable CORS
 app.use(cors());
@@ -151,19 +151,13 @@ app.get('/api/analyze', (req, res) => {
       // Extract data from the specific format
       const date = values[0];
       const description = values[1];
-      const amount = parseFloat(values[2] || '0');
-      const balance = parseFloat(values[3] || '0');
+      const expenseAmount = parseFloat(values[2] || '0'); // 3rd column is expense
+      const incomeAmount = parseFloat(values[3] || '0'); // 4th column is income
 
-      // Determine if this is income (PAYMENT - THANK YOU) or expense
-      const isIncome = description === 'PAYMENT - THANK YOU';
-      const transactionAmount = isIncome ? Math.abs(amount) : -Math.abs(amount);
-
-      if (!isNaN(transactionAmount)) {
+      if (!isNaN(expenseAmount) || !isNaN(incomeAmount)) {
         // Categorize the transaction
         let category = 'Uncategorized';
-        if (isIncome) {
-          category = 'Income';
-        } else if (description.includes('TIM HORTONS') || description.includes('DAILY GRIND')) {
+        if (description.includes('TIM HORTONS') || description.includes('DAILY GRIND')) {
           category = 'Coffee';
         } else if (description.includes('LA FITNESS')) {
           category = 'Fitness';
@@ -182,7 +176,8 @@ app.get('/api/analyze', (req, res) => {
         results.push({
           Date: date,
           Description: description,
-          Amount: transactionAmount,
+          Expense: expenseAmount,
+          Income: incomeAmount,
           Category: category
         });
       }
@@ -211,31 +206,35 @@ app.get('/api/analyze', (req, res) => {
 
     // Process each transaction
     results.forEach(transaction => {
-      const amount = transaction.Amount;
+      const expense = transaction.Expense;
+      const income = transaction.Income;
       const category = transaction.Category;
       const date = transaction.Date;
       const description = transaction.Description;
 
-      console.log('Processing transaction:', { amount, category, date, description });
+      console.log('Processing transaction:', { expense, income, category, date, description });
 
       // Add to transactions list
       financialData.transactions.push({
         date,
         description,
-        amount,
+        amount: expense > 0 ? -expense : income,
         category
       });
 
-      // Calculate income and expenses
-      if (description === 'PAYMENT - THANK YOU') {
-        // For income, use the absolute value from the 3rd column
-        financialData.income += Math.abs(amount);
-      } else {
-        // For expenses, use the absolute value from the 3rd column
+      // Add to income if there's an income amount
+      if (income > 0) {
+        console.log('Adding to income:', income);
+        financialData.income += income;
+      }
+
+      // Add to expenses if there's an expense amount
+      if (expense > 0) {
         if (!financialData.expenses[category]) {
           financialData.expenses[category] = 0;
         }
-        financialData.expenses[category] += Math.abs(amount);
+        console.log('Adding to expenses:', { category, expense });
+        financialData.expenses[category] += expense;
       }
     });
 
@@ -245,9 +244,14 @@ app.get('/api/analyze', (req, res) => {
       value
     }));
 
-    // Calculate savings rate
+    // Calculate total expenses
     const totalExpenses = Object.values(financialData.expenses).reduce((sum, value) => sum + value, 0);
-    financialData.savingsRate = financialData.income > 0 ? ((financialData.income - totalExpenses) / financialData.income) * 100 : 0;
+    
+    // Calculate savings (income - expenses)
+    const savings = financialData.income - totalExpenses;
+    
+    // Calculate savings rate
+    financialData.savingsRate = financialData.income > 0 ? (savings / financialData.income) * 100 : 0;
 
     // Generate spending insights
     const highestSpending = Object.entries(financialData.expenses)
@@ -263,12 +267,21 @@ app.get('/api/analyze', (req, res) => {
     financialData.spendingInsights.savingsTips = [
       `Consider reducing spending in ${financialData.spendingInsights.highestCategory}`,
       `Your savings rate is ${financialData.savingsRate.toFixed(1)}%`,
+      `Total savings: $${savings.toFixed(2)}`,
       financialData.spendingInsights.unusualSpending 
         ? `Warning: High spending in ${financialData.spendingInsights.highestCategory}`
         : 'Your spending patterns look healthy'
     ];
 
-    console.log('Final financial data:', financialData);
+    console.log('Final financial data:', {
+      income: financialData.income,
+      totalExpenses,
+      savings,
+      savingsRate: financialData.savingsRate,
+      categories: financialData.categories,
+      transactions: financialData.transactions
+    });
+
     res.json(financialData);
   } catch (error) {
     console.error('Error during analysis:', error);
