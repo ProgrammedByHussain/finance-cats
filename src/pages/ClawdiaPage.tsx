@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
+import { playMeowSound } from "@/utils/sound";
 
 export default function ClawdiaPage() {
   const navigate = useNavigate();
@@ -14,8 +15,15 @@ export default function ClawdiaPage() {
   const [riskTolerance, setRiskTolerance] = useState([5]); // Middle of scale 0-10
   const [investmentGoal, setInvestmentGoal] = useState("retirement");
   const [timeHorizon, setTimeHorizon] = useState("long");
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation after component mount
+    setAnimate(true);
+  }, []);
 
   const handleSubmit = () => {
+    playMeowSound();
     // Process the investment data
     console.log("Investment amount:", investmentAmount);
     console.log("Risk tolerance:", riskTolerance[0]);
@@ -56,7 +64,11 @@ export default function ClawdiaPage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center mb-8">
+          <div
+            className={`flex items-center mb-8 ${
+              animate ? "clawdia-appear" : "opacity-0"
+            }`}
+          >
             <img
               src="/src/images/clawdia_ok.png"
               alt="Dr. Clawdia"
@@ -73,14 +85,14 @@ export default function ClawdiaPage() {
             </div>
           </div>
 
-          <Card className="mb-6">
+          <Card className={`mb-6 ${animate ? "clawdia-card" : "opacity-0"}`}>
             <CardHeader>
               <CardTitle className="text-xl text-catty-brown">
                 How much would you like to invest?
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-4 stagger-appear">
                 <div className="flex items-center gap-4">
                   <Label htmlFor="investmentAmount">
                     Investment Amount ($):
@@ -99,14 +111,17 @@ export default function ClawdiaPage() {
             </CardContent>
           </Card>
 
-          <Card className="mb-6">
+          <Card
+            className={`mb-6 ${animate ? "clawdia-card" : "opacity-0"}`}
+            style={{ animationDelay: "0.5s" }}
+          >
             <CardHeader>
               <CardTitle className="text-xl text-catty-brown">
                 What is your risk tolerance?
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
+              <div className="space-y-6 stagger-appear">
                 <Slider
                   value={riskTolerance}
                   onValueChange={setRiskTolerance}
@@ -125,7 +140,10 @@ export default function ClawdiaPage() {
             </CardContent>
           </Card>
 
-          <Card className="mb-6">
+          <Card
+            className={`mb-6 ${animate ? "clawdia-card" : "opacity-0"}`}
+            style={{ animationDelay: "0.7s" }}
+          >
             <CardHeader>
               <CardTitle className="text-xl text-catty-brown">
                 What is your primary investment goal?
@@ -135,6 +153,7 @@ export default function ClawdiaPage() {
               <RadioGroup
                 value={investmentGoal}
                 onValueChange={setInvestmentGoal}
+                className="stagger-appear"
               >
                 <div className="flex items-center space-x-2 mb-4">
                   <RadioGroupItem value="retirement" id="retirement" />
@@ -156,14 +175,21 @@ export default function ClawdiaPage() {
             </CardContent>
           </Card>
 
-          <Card className="mb-8">
+          <Card
+            className={`mb-8 ${animate ? "clawdia-card" : "opacity-0"}`}
+            style={{ animationDelay: "0.9s" }}
+          >
             <CardHeader>
               <CardTitle className="text-xl text-catty-brown">
                 What is your investment time horizon?
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <RadioGroup value={timeHorizon} onValueChange={setTimeHorizon}>
+              <RadioGroup
+                value={timeHorizon}
+                onValueChange={setTimeHorizon}
+                className="stagger-appear"
+              >
                 <div className="flex items-center space-x-2 mb-4">
                   <RadioGroupItem value="short" id="short" />
                   <Label htmlFor="short">Short Term (1-3 years)</Label>
@@ -180,7 +206,11 @@ export default function ClawdiaPage() {
             </CardContent>
           </Card>
 
-          <div className="flex justify-between">
+          <div
+            className={`flex justify-between ${
+              animate ? "stagger-appear" : "opacity-0"
+            }`}
+          >
             <Button
               onClick={() => navigate("/")}
               variant="outline"

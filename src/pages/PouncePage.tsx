@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import FileUpload from "@/components/FileUpload";
 import Dashboard from "@/components/Dashboard";
@@ -10,9 +10,15 @@ export default function PouncePage() {
   const navigate = useNavigate();
   const [financialData, setFinancialData] = useState<any>(null);
   const [advisorOpen, setAdvisorOpen] = useState(true);
+  const [animate, setAnimate] = useState(false);
   const [catAdvice, setCatAdvice] = useState<string | undefined>(
     "Meow! Upload your spending history CSV, and I'll help you optimize your budget!"
   );
+
+  useEffect(() => {
+    // Trigger animation after component mount
+    setAnimate(true);
+  }, []);
 
   const handleFileUploaded = (data: any) => {
     setFinancialData(data);
@@ -36,7 +42,11 @@ export default function PouncePage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center mb-8">
+          <div
+            className={`flex items-center mb-8 ${
+              animate ? "pounce-appear" : "opacity-0"
+            }`}
+          >
             <img
               src="/src/images/pounce_ok.png"
               alt="Sir Pounce"
@@ -54,10 +64,23 @@ export default function PouncePage() {
           </div>
 
           {!financialData ? (
+<<<<<<< HEAD
             <div className="max-w-md mx-auto">
               <FileUpload onFileUploaded={handleFileUploaded} accept=".csv" />
+=======
+            <div
+              className={`max-w-md mx-auto ${
+                animate ? "pounce-card" : "opacity-0"
+              }`}
+            >
+              <FileUpload onFileUploaded={handleFileUploaded} />
+>>>>>>> 982109b6c4c6984ecaecc3fdbc4e36a26724fcce
 
-              <div className="mt-6 text-center">
+              <div
+                className={`mt-6 text-center ${
+                  animate ? "stagger-appear" : "opacity-0"
+                }`}
+              >
                 <Button
                   onClick={() => navigate("/")}
                   variant="outline"
@@ -69,9 +92,15 @@ export default function PouncePage() {
             </div>
           ) : (
             <>
-              <Dashboard data={financialData} />
+              <div className={`${animate ? "pounce-card" : "opacity-0"}`}>
+                <Dashboard data={financialData} />
+              </div>
 
-              <div className="mt-6 flex justify-center">
+              <div
+                className={`mt-6 flex justify-center ${
+                  animate ? "stagger-appear" : "opacity-0"
+                }`}
+              >
                 <Button
                   onClick={() => navigate("/")}
                   variant="outline"
