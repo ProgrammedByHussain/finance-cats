@@ -10,6 +10,8 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
+  Sector,
 } from "recharts";
 import { DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 
@@ -39,18 +41,94 @@ interface DashboardProps {
 }
 
 const COLORS = [
-  "#E9967A",
-  "#8A6D5F",
-  "#FDE1D3",
-  "#FEF7CD",
-  "#8E9196",
-  "#FFB6C1",
-  "#D8BFD8",
-  "#ADD8E6",
-  "#90EE90",
+  "#E9967A", // catty-orange
+  "#8A6D5F", // catty-brown
+  "#FDE1D3", // catty-peach
+  "#A24857", // catty-cream
+  "#8E9196", // catty-gray
+  "#FFB6C1", // light pink
+  "#D8BFD8", // thistle
+  "#ADD8E6", // light blue
+  "#90EE90", // light green
 ];
 
+// Custom label renderer for the pie chart
+const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+  index,
+  name,
+}: any) => {
+  // Only show percentage on the chart to keep it clean
+  // Full details will be in the legend and tooltip
+  if (percent < 0.08) return null; // Hide very small segments' labels
+
+  return (
+    <text
+      x={cx}
+      y={cy}
+      fill="#FFF"
+      textAnchor="middle"
+      dominantBaseline="central"
+      fontSize={10}
+      fontWeight="bold"
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
+// Active shape for hover effect - more compact
+const renderActiveShape = (props: any) => {
+  const {
+    cx,
+    cy,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+    value,
+    percent,
+  } = props;
+
+  return (
+    <g>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius + 5}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <text
+        x={cx}
+        y={cy}
+        textAnchor="middle"
+        fill="#FFF"
+        fontWeight="bold"
+        fontSize={9}
+      >
+        {`${payload.name}`}
+      </text>
+    </g>
+  );
+};
+
 export default function Dashboard({ data }: DashboardProps) {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  const onPieEnter = (_: any, index: number) => {
+    setActiveIndex(index);
+  };
+
   if (!data) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -130,20 +208,24 @@ export default function Dashboard({ data }: DashboardProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="h-64">
+            {" "}
+            {/* Compact height */}
             {data.categories.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
                   <Pie
+                    activeIndex={activeIndex}
+                    activeShape={renderActiveShape}
                     data={data.categories}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={80}
+                    label={renderCustomizedLabel}
+                    outerRadius={60}
+                    innerRadius={30}
                     fill="#8884d8"
                     dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
+                    onMouseEnter={onPieEnter}
                   >
                     {data.categories.map((entry, index) => (
                       <Cell
@@ -152,7 +234,17 @@ export default function Dashboard({ data }: DashboardProps) {
                       />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `${value}`} />
+                  <Tooltip
+                    formatter={(value) => `${value.toFixed(2)}`}
+                    labelFormatter={(name) => `Category: ${name}`}
+                  />
+                  <Legend
+                    layout="vertical"
+                    align="right"
+                    verticalAlign="middle"
+                    iconSize={8}
+                    fontSize={10}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
