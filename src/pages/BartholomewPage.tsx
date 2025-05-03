@@ -149,7 +149,7 @@ export default function BartholomewPage() {
               }`}
             >
               <img
-                src="/src/images/barth_ok.png"
+                src="/images/barth_ok.png"
                 alt="Dr. Bartholomeow"
                 className="w-24 h-24 object-contain mr-4"
               />
@@ -186,7 +186,7 @@ export default function BartholomewPage() {
                 name="Dr. Bartholomeow"
                 degree="Ph.D., Quantitative Finance & Risk Management"
                 school="University of Oxford"
-                schoolLogo="/src/images/oxford_logo.png"
+                schoolLogo="/images/oxford_logo.png"
               />
               <div className="flex justify-center mt-4 mb-6">
                 <Button variant="ghost" size="icon" onClick={toggleSpeech}>
@@ -354,8 +354,8 @@ export default function BartholomewPage() {
       {showResults && (
         <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
           <TalkingImage
-            imgIdle="/src/images/barth_ok.png"
-            imgTalking="/src/images/barth_talk.png"
+            imgIdle="/images/barth_ok.png"
+            imgTalking="/images/barth_talk.png"
           />
         </div>
       )}

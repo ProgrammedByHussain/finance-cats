@@ -162,9 +162,9 @@ export default function ClawdiaPage() {
               <div className="flex flex-col items-center w-full">
                 <CatCredentialsPlaque
                   name="Dr. Clawdia"
-                  degree="Ph.D., Credit Score Analytics & Portfolio Optimization, Stanford University"
+                  degree="Ph.D., Credit Score Analytics & Portfolio Optimization"
                   school="Stanford University"
-                  schoolLogo="/src/images/stanford_logo.png"
+                  schoolLogo="/images/stanford_logo.png"
                 />
                 <div className="flex justify-center mt-4">
                   <Button variant="ghost" size="icon" onClick={toggleSpeech}>
@@ -200,8 +200,8 @@ export default function ClawdiaPage() {
 
         <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
           <TalkingImage
-            imgIdle="/src/images/clawdia_ok.png"
-            imgTalking="/src/images/clawdia_talk.png"
+            imgIdle="/images/clawdia_ok.png"
+            imgTalking="/images/clawdia_talk.png"
           />
         </div>
       </div>
@@ -220,7 +220,7 @@ export default function ClawdiaPage() {
             }`}
           >
             <img
-              src="/src/images/clawdia_ok.png"
+              src="/images/clawdia_ok.png"
               alt="Dr. Clawdia"
               className="w-24 h-24 object-contain mr-4"
             />
