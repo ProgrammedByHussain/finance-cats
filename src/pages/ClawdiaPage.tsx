@@ -9,6 +9,9 @@ import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
 import { playMeowSound } from "@/utils/sound";
 import InvestmentDashboard from "@/components/InvestmentDashboard";
+import { getInvestmentRecommendations } from "@/services/geminiService";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ClawdiaPage() {
   const navigate = useNavigate();
@@ -18,15 +21,39 @@ export default function ClawdiaPage() {
   const [timeHorizon, setTimeHorizon] = useState("long");
   const [animate, setAnimate] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiData, setApiData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Trigger animation after component mount
     setAnimate(true);
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     playMeowSound();
-    setShowResults(true);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Call the Gemini API service to get recommendations
+      const investmentPlan = await getInvestmentRecommendations(
+        investmentAmount,
+        riskTolerance,
+        investmentGoal,
+        timeHorizon
+      );
+
+      setApiData(investmentPlan);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error getting investment recommendations:", error);
+      setError(
+        "Meow! Dr. Clawdia had trouble analyzing your preferences. Please check if the Gemini API key is configured correctly."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (showResults) {
@@ -59,7 +86,24 @@ export default function ClawdiaPage() {
                 Edit Preferences
               </Button>
             </div>
-            <InvestmentDashboard data={{ investmentAmount, riskTolerance, investmentGoal, timeHorizon }} />
+
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <InvestmentDashboard
+              data={{
+                investmentAmount,
+                riskTolerance,
+                investmentGoal,
+                timeHorizon,
+                apiData, // Pass the API data to the dashboard
+              }}
+            />
           </div>
         </div>
       </div>
@@ -92,6 +136,14 @@ export default function ClawdiaPage() {
               </p>
             </div>
           </div>
+
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <Card className={`mb-6 ${animate ? "clawdia-card" : "opacity-0"}`}>
             <CardHeader>
@@ -229,8 +281,16 @@ export default function ClawdiaPage() {
             <Button
               onClick={handleSubmit}
               className="bg-catty-orange hover:bg-catty-brown text-white"
+              disabled={isLoading}
             >
-              Get Investment Plan
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </>
+              ) : (
+                "Get Investment Plan"
+              )}
             </Button>
           </div>
         </div>
