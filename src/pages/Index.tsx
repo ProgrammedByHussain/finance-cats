@@ -7,6 +7,11 @@ import Dashboard from '@/components/Dashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Cat } from 'lucide-react';
 
+// Import cat images
+import barthOk from '@/images/barth_ok.png';
+import pounceOk from '@/images/pounce_ok.png';
+import clawdiaOk from '@/images/clawdia_ok.png';
+
 const Index = () => {
   const [financialData, setFinancialData] = useState<any>(null);
   const [advisorOpen, setAdvisorOpen] = useState(true);
@@ -32,6 +37,7 @@ const Index = () => {
     <div className="min-h-screen bg-catty-light-gray">
       <Navbar />
       <Hero />
+      <Navbar />
       
       <div className="container py-12 px-4 md:px-6">
         <h2 className="text-2xl font-bold text-catty-brown mb-8 text-center">Your Financial Dashboard</h2>
