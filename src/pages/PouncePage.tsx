@@ -8,13 +8,13 @@ import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
-import TalkingImage
- from "@/components/TalkingImage";
+import TalkingImage from "@/components/TalkingImage";
 import {
   playCatSpeech,
   stopAllSpeech,
   preloadCatSpeech,
   AudioManager,
+  AudioEvent,
 } from "@/services/elevenlabsService";
 
 export default function PouncePage() {
@@ -148,6 +148,21 @@ export default function PouncePage() {
                 </div>
               </div>
             )}
+
+            {!financialData && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSpeech}
+                className="ml-2"
+              >
+                {isSpeechMuted ? (
+                  <VolumeX className="h-5 w-5 text-catty-gray" />
+                ) : (
+                  <Volume2 className="h-5 w-5 text-catty-orange" />
+                )}
+              </Button>
+            )}
           </div>
 
           {/* CREDENTIALS PLAQUE */}
@@ -213,14 +228,20 @@ export default function PouncePage() {
                 }`}
               >
                 <Button
-                  onClick={() => setFinancialData(null)}
+                  onClick={() => {
+                    setFinancialData(null);
+                    stopAllSpeech();
+                  }}
                   variant="outline"
                   className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach mr-4"
                 >
                   Upload Another CSV
                 </Button>
                 <Button
-                  onClick={() => navigate("/")}
+                  onClick={() => {
+                    navigate("/");
+                    stopAllSpeech();
+                  }}
                   variant="outline"
                   className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
                 >

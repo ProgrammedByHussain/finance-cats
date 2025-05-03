@@ -29,19 +29,61 @@ export const SPEECH_TEMPLATES = {
 
 export type CatAdvisor = keyof typeof VOICES;
 
+// Events for our audio manager
+export enum AudioEvent {
+  PLAY_START = "play_start",
+  PLAY_END = "play_end",
+  PLAY_ERROR = "play_error",
+  ALL_STOP = "all_stop",
+}
+
+type AudioEventListener = (event: AudioEvent) => void;
+
 export class AudioManager {
   private static instance: AudioManager;
   private currentAudio: HTMLAudioElement | null = null;
   private audioQueue: HTMLAudioElement[] = [];
   private isPlaying: boolean = false;
+  private eventListeners: Map<AudioEvent, AudioEventListener[]> = new Map();
 
-  private constructor() {}
+  private constructor() {
+    // Initialize event listener collections for each event type
+    Object.values(AudioEvent).forEach((event) => {
+      this.eventListeners.set(event, []);
+    });
+  }
 
   public static getInstance(): AudioManager {
     if (!AudioManager.instance) {
       AudioManager.instance = new AudioManager();
     }
     return AudioManager.instance;
+  }
+
+  public addEventListener(
+    event: AudioEvent,
+    listener: AudioEventListener
+  ): void {
+    const listeners = this.eventListeners.get(event) || [];
+    listeners.push(listener);
+    this.eventListeners.set(event, listeners);
+  }
+
+  public removeEventListener(
+    event: AudioEvent,
+    listener: AudioEventListener
+  ): void {
+    const listeners = this.eventListeners.get(event) || [];
+    const index = listeners.indexOf(listener);
+    if (index !== -1) {
+      listeners.splice(index, 1);
+      this.eventListeners.set(event, listeners);
+    }
+  }
+
+  private triggerEvent(event: AudioEvent): void {
+    const listeners = this.eventListeners.get(event) || [];
+    listeners.forEach((listener) => listener(event));
   }
 
   public playAudio(audio: HTMLAudioElement): void {
@@ -51,10 +93,23 @@ export class AudioManager {
       this.currentAudio = audio;
       this.isPlaying = true;
 
-      audio.addEventListener("ended", () => this.playNext());
+      // Trigger start event
+      this.triggerEvent(AudioEvent.PLAY_START);
+
+      audio.addEventListener("ended", () => {
+        this.triggerEvent(AudioEvent.PLAY_END);
+        this.playNext();
+      });
+
+      audio.addEventListener("error", () => {
+        this.triggerEvent(AudioEvent.PLAY_ERROR);
+        this.isPlaying = false;
+        this.playNext();
+      });
 
       audio.play().catch((error) => {
         console.error("Error playing audio:", error);
+        this.triggerEvent(AudioEvent.PLAY_ERROR);
         this.isPlaying = false;
         this.playNext();
       });
@@ -79,6 +134,13 @@ export class AudioManager {
     }
     this.audioQueue = [];
     this.isPlaying = false;
+
+    // Trigger stop event
+    this.triggerEvent(AudioEvent.ALL_STOP);
+  }
+
+  public isCurrentlyPlaying(): boolean {
+    return this.isPlaying;
   }
 }
 
@@ -186,4 +248,9 @@ export async function playCatSpeech(
 export function stopAllSpeech(): void {
   const audioManager = AudioManager.getInstance();
   audioManager.stopAll();
+}
+
+export function isSpeechPlaying(): boolean {
+  const audioManager = AudioManager.getInstance();
+  return audioManager.isCurrentlyPlaying();
 }

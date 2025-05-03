@@ -19,6 +19,7 @@ import {
   stopAllSpeech,
   preloadCatSpeech,
   AudioManager,
+  AudioEvent,
 } from "@/services/elevenlabsService";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
 
@@ -144,7 +145,27 @@ export default function ClawdiaPage() {
   const toggleSpeech = () => {
     if (isSpeechMuted) {
       setIsSpeechMuted(false);
-      if (showResults && apiData) playCatSpeech("clawdia");
+      if (showResults && apiData) {
+        let speech = `Greetings, I'm Doctor Clawdia. `;
+        speech += `I've created an investment portfolio tailored to your ${investmentGoal} goal and a ${riskTolerance[0]}/10 risk tolerance. `;
+
+        if (apiData.portfolioAllocation) {
+          const top = [...apiData.portfolioAllocation].sort(
+            (a, b) => b.value - a.value
+          )[0];
+          speech += `I've allocated ${top.value}% to ${top.name}. `;
+          if (apiData.annualReturn) {
+            speech += `Projected annual return is ${
+              apiData.annualReturn
+            }%, growing $${investmentAmount} to $${Math.round(
+              apiData.totalReturn
+            )} over ${apiData.years} years. `;
+          }
+        }
+
+        speech += `Let's review the plan!`;
+        playCatSpeech("clawdia", speech);
+      }
     } else {
       setIsSpeechMuted(true);
       stopAllSpeech();
@@ -195,6 +216,30 @@ export default function ClawdiaPage() {
                 apiData,
               }}
             />
+
+            <div className="mt-8">
+              <div className="flex justify-center gap-4">
+                <Button
+                  onClick={() => {
+                    setShowResults(false);
+                    stopAllSpeech();
+                  }}
+                  variant="outline"
+                  className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
+                >
+                  Start Over
+                </Button>
+                <Button
+                  onClick={() => {
+                    navigate("/");
+                    stopAllSpeech();
+                  }}
+                  className="bg-catty-orange hover:bg-catty-brown text-white"
+                >
+                  Return Home
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 

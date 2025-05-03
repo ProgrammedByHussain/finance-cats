@@ -17,6 +17,7 @@ import {
   stopAllSpeech,
   preloadCatSpeech,
   AudioManager,
+  AudioEvent,
 } from "@/services/elevenlabsService";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
 
@@ -128,7 +129,18 @@ export default function BartholomewPage() {
   const toggleSpeech = () => {
     if (isSpeechMuted) {
       setIsSpeechMuted(false);
-      if (showResults) playCatSpeech("bartholomew");
+      if (showResults) {
+        let speechText = `Hello there! I'm Doctor Bartholomeow, your credit card expert. `;
+        if (recommendations.length > 0) {
+          speechText += `Based on your preferences, I've found ${recommendations.length} purr-fect options for you. `;
+          speechText += `My top recommendation is the ${recommendations[0].name}. `;
+          speechText += `This card ${recommendations[0].description.toLowerCase()} `;
+          speechText += `and offers benefits like ${recommendations[0].benefits[0].toLowerCase()}.`;
+        } else {
+          speechText += `I've analyzed your preferences and have some paw-some recommendations for you!`;
+        }
+        playCatSpeech("bartholomew", speechText);
+      }
     } else {
       setIsSpeechMuted(true);
       stopAllSpeech();
