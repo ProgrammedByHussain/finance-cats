@@ -24,7 +24,7 @@ export default function Navbar() {
             to="/bartholomew"
             className="text-catty-gray hover:text-catty-brown text-sm font-medium"
           >
-            Investment
+            Credit
           </Link>
           <Link
             to="/pounce"
@@ -36,7 +36,7 @@ export default function Navbar() {
             to="/clawdia"
             className="text-catty-gray hover:text-catty-brown text-sm font-medium"
           >
-            Planning
+            Investment
           </Link>
         </nav>
       </div>
