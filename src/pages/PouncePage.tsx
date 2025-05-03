@@ -5,6 +5,8 @@ import Dashboard from "@/components/Dashboard";
 import CatAdvisor from "@/components/CatAdvisor";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function PouncePage() {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ export default function PouncePage() {
   const [catAdvice, setCatAdvice] = useState<string | undefined>(
     "Meow! Upload your spending history CSV, and I'll help you optimize your budget!"
   );
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Trigger animation after component mount
@@ -21,20 +24,42 @@ export default function PouncePage() {
   }, []);
 
   const handleFileUploaded = (data: any) => {
-    console.log('Received data from FileUpload:', data);
+    console.log("Received data from FileUpload:", data);
+
+    if (!data) {
+      setError(
+        "Unable to analyze the CSV data. Please try another file format."
+      );
+      return;
+    }
+
     setFinancialData(data);
 
     // Generate cat advice based on the data
-    const tips = [
-      `Meow! I notice you're spending $${data.expenses?.food || 0} on food. Purr-haps you could save by cooking more at home?`,
-      `Your biggest expense is ${data.spendingInsights?.highestCategory || 'unknown'}. Maybe it's time to pounce on some savings there!`,
-      `You're saving ${data.savingsRate || 0}% of your income. Let's try to improve that to 20%! That would be the cat's meow!`,
-      `I see some unusual expenses in entertainment. Remember, the best things in life are free, like napping in sunbeams!`,
-      `Your spending on shopping seems a bit high. Try to pause before purchasing - ask if you really need it, or if you're just chasing a shiny object!`,
-    ];
+    try {
+      const generateCatAdvice = () => {
+        // Check which category has the highest expense
+        const highestCategory =
+          data.spendingInsights?.highestCategory || "unknown";
 
-    // Select a random tip
-    setCatAdvice(tips[Math.floor(Math.random() * tips.length)]);
+        // Get a random tip from the savings tips
+        const savingsTips = data.spendingInsights?.savingsTips || [];
+        const randomTip =
+          savingsTips.length > 0
+            ? savingsTips[Math.floor(Math.random() * savingsTips.length)]
+            : "Meow! Try to set aside a little more each month for savings!";
+
+        // Format the advice with some cat puns
+        return `Meow! I notice your highest spending is in ${highestCategory}. Purr-haps you could consider this tip: ${randomTip}`;
+      };
+
+      setCatAdvice(generateCatAdvice());
+    } catch (error) {
+      console.error("Error generating cat advice:", error);
+      setCatAdvice(
+        "Meow! I've analyzed your spending, but I'm having trouble coming up with specific advice. Let's work on your budget together!"
+      );
+    }
   };
 
   return (
@@ -58,14 +83,25 @@ export default function PouncePage() {
                 Sir Pounce's Budget Analyzer
               </h1>
               <p className="text-catty-gray mt-2">
-                Upload your spending history and I'll help you identify savings
-                opportunities!
+                Upload your bank statement CSV and I'll help you identify
+                savings opportunities with AI!
               </p>
             </div>
           </div>
 
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           {!financialData ? (
-            <div className={`max-w-md mx-auto ${animate ? "pounce-card" : "opacity-0"}`}>
+            <div
+              className={`max-w-md mx-auto ${
+                animate ? "pounce-card" : "opacity-0"
+              }`}
+            >
               <FileUpload onFileUploaded={handleFileUploaded} accept=".csv" />
 
               <div
@@ -93,6 +129,13 @@ export default function PouncePage() {
                   animate ? "stagger-appear" : "opacity-0"
                 }`}
               >
+                <Button
+                  onClick={() => setFinancialData(null)}
+                  variant="outline"
+                  className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach mr-4"
+                >
+                  Upload Another CSV
+                </Button>
                 <Button
                   onClick={() => navigate("/")}
                   variant="outline"

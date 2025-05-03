@@ -16,6 +16,24 @@ interface InvestmentRecommendation {
   allocation: string;
 }
 
+interface FinancialAnalysis {
+  income: number;
+  expenses: Record<string, number>;
+  categories: Array<{ name: string; value: number }>;
+  transactions: Array<{
+    date: string;
+    description: string;
+    amount: number;
+    category: string;
+  }>;
+  savingsRate: number;
+  spendingInsights: {
+    highestCategory: string;
+    unusualSpending: boolean;
+    savingsTips: string[];
+  };
+}
+
 // Get API key from environment variables
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -167,6 +185,85 @@ export async function getInvestmentRecommendations(
     return investmentPlan;
   } catch (error) {
     console.error("Error fetching investment recommendations:", error);
+    throw error;
+  }
+}
+
+export async function analyzeCSVData(
+  csvData: string
+): Promise<FinancialAnalysis> {
+  // Construct the prompt for Gemini
+  const prompt = `You are Sir Pounce, a cat financial advisor specializing in budgeting and expense analysis.
+    Analyze the following bank statement CSV data and provide insights:
+    
+    CSV Data:
+    ${csvData}
+    
+    IMPORTANT INSTRUCTIONS:
+    1. Parse the transaction data
+    2. Identify income vs expenses
+    3. Categorize expenses into common categories (e.g., Food, Utilities, Transportation, etc.)
+    4. Calculate total income and expenses
+    5. Identify spending patterns and the highest spending category
+    6. Provide savings tips based on the spending patterns
+    
+    Format your response as valid JSON with this structure:
+    {
+      "income": 5000,
+      "expenses": {
+        "food": 300,
+        "housing": 1200,
+        "transportation": 250,
+        "utilities": 150,
+        "entertainment": 100,
+        "other": 200
+      },
+      "categories": [
+        {"name": "Food", "value": 300},
+        {"name": "Housing", "value": 1200},
+        {"name": "Transportation", "value": 250},
+        {"name": "Utilities", "value": 150},
+        {"name": "Entertainment", "value": 100},
+        {"name": "Other", "value": 200}
+      ],
+      "transactions": [
+        {
+          "date": "2024-01-01",
+          "description": "Sample Transaction",
+          "amount": 50.00,
+          "category": "Food"
+        }
+      ],
+      "savingsRate": 20,
+      "spendingInsights": {
+        "highestCategory": "Housing",
+        "unusualSpending": false,
+        "savingsTips": [
+          "Try to reduce dining out expenses",
+          "Consider carpooling to save on transportation",
+          "Look for better deals on entertainment subscriptions"
+        ]
+      }
+    }`;
+
+  try {
+    // Call Gemini API
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const text = response.text();
+
+    // Parse the JSON response
+    // Find the JSON part of the response (in case there's surrounding text)
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("No valid JSON found in the response");
+    }
+
+    const financialAnalysis = JSON.parse(jsonMatch[0]) as FinancialAnalysis;
+    return financialAnalysis;
+  } catch (error) {
+    console.error("Error analyzing CSV data:", error);
     throw error;
   }
 }
