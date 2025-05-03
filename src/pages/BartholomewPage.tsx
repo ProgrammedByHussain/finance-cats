@@ -9,12 +9,14 @@ import { useNavigate } from "react-router-dom";
 import { playMeowSound } from "@/utils/sound";
 import { getCreditCardRecommendations } from "@/services/geminiService";
 import { CreditCardRecommendation } from "@/components/CreditCardRecommendation";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
 
 export default function BartholomewPage() {
   const navigate = useNavigate();
+
   const [spendingCategories, setSpendingCategories] = useState({
     dining: false,
     travel: false,
@@ -23,22 +25,38 @@ export default function BartholomewPage() {
     online: false,
     entertainment: false,
   });
-
   const [cardGoal, setCardGoal] = useState("cashback");
   const [animate, setAnimate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showCredentials, setShowCredentials] = useState(false);
+  const [isSpeechMuted, setIsSpeechMuted] = useState(false);
 
   useEffect(() => {
-    // Trigger animation after component mount
     setAnimate(true);
+    return () => {
+      stopAllSpeech();
+    };
   }, []);
 
+  useEffect(() => {
+    if (showResults && !isSpeechMuted) {
+      let speechText = `Hello there! I'm Doctor Bartholomeow, your credit card expert. `;
+      if (recommendations.length > 0) {
+        speechText += `Based on your preferences, I've found ${recommendations.length} purr-fect options for you. `;
+        speechText += `My top recommendation is the ${recommendations[0].name}. `;
+        speechText += `This card ${recommendations[0].description.toLowerCase()} `;
+        speechText += `and offers benefits like ${recommendations[0].benefits[0].toLowerCase()}.`;
+      } else {
+        speechText += `I've analyzed your preferences and have some paw-some recommendations for you!`;
+      }
+      playCatSpeech("bartholomeow", speechText);
+    }
+  }, [showResults, isSpeechMuted, recommendations]);
+
   const handleCategoryChange = (category: string) => {
-    setSpendingCategories((prev) => ({
+    setSpendingCategories(prev => ({
       ...prev,
       [category]: !prev[category as keyof typeof prev],
     }));
@@ -48,22 +66,30 @@ export default function BartholomewPage() {
     playMeowSound();
     setIsLoading(true);
     setError(null);
-
     try {
-      // Call the Gemini API service to get recommendations
       const cards = await getCreditCardRecommendations(
         spendingCategories,
         cardGoal
       );
       setRecommendations(cards);
       setShowResults(true);
-    } catch (error) {
-      console.error("Error getting recommendations:", error);
+    } catch (e) {
+      console.error(e);
       setError(
         "Meow! Dr. Bartholomeow had trouble analyzing your preferences. Please check if the Gemini API key is configured correctly."
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const toggleSpeech = () => {
+    if (isSpeechMuted) {
+      setIsSpeechMuted(false);
+      if (showResults) playCatSpeech("bartholomeow");
+    } else {
+      setIsSpeechMuted(true);
+      stopAllSpeech();
     }
   };
 
@@ -73,6 +99,8 @@ export default function BartholomewPage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
+
+          {/* header + title + volume toggle (only before results) */}
           {!showResults && (
             <div
               className={`flex items-center mb-8 ${
@@ -84,10 +112,24 @@ export default function BartholomewPage() {
                 alt="Dr. Bartholomeow"
                 className="w-24 h-24 object-contain mr-4"
               />
-              <div>
-                <h1 className="text-3xl font-bold text-catty-brown">
-                  Dr. Bartholomeow's Credit Card Finder
-                </h1>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-3xl font-bold text-catty-brown">
+                    Dr. Bartholomeow's Canadian Credit Card Advisor
+                  </h1>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleSpeech}
+                    className="ml-2"
+                  >
+                    {isSpeechMuted ? (
+                      <VolumeX className="h-5 w-5 text-catty-gray" />
+                    ) : (
+                      <Volume2 className="h-5 w-5 text-catty-orange" />
+                    )}
+                  </Button>
+                </div>
                 <p className="text-catty-gray mt-2">
                   Let me help you find the purrfect Canadian credit card based on
                   your spending habits and goals.
@@ -96,13 +138,25 @@ export default function BartholomewPage() {
             </div>
           )}
 
-          {showResults && showCredentials && (
-            <CatCredentialsPlaque
-              name="Dr. Bartholomeow"
-              degree="Ph.D., Quantitative Finance & Risk Management"
-              school="University of Oxford"
-              schoolLogo="/src/images/oxford_logo.png"
-            />
+          {/* credentials plaque + volume toggle (after results) */}
+          {showResults && (
+            <>
+              <CatCredentialsPlaque
+                name="Dr. Bartholomeow"
+                degree="Ph.D., Quantitative Finance & Risk Management"
+                school="University of Oxford"
+                schoolLogo="/src/images/stanford_logo.png"
+              />
+              <div className="flex justify-center mt-4 mb-6">
+                <Button variant="ghost" size="icon" onClick={toggleSpeech}>
+                  {isSpeechMuted ? (
+                    <VolumeX className="h-6 w-6 text-catty-gray" />
+                  ) : (
+                    <Volume2 className="h-6 w-6 text-catty-orange" />
+                  )}
+                </Button>
+              </div>
+            </>
           )}
 
           {error && (
@@ -115,8 +169,11 @@ export default function BartholomewPage() {
 
           {!showResults ? (
             <>
+              {/* form cards */}
               <Card
-                className={`mb-8 ${animate ? "bartholomew-card" : "opacity-0"}`}
+                className={`mb-8 ${
+                  animate ? "bartholomew-card" : "opacity-0"
+                }`}
               >
                 <CardHeader>
                   <CardTitle className="text-xl text-catty-brown">
@@ -124,15 +181,13 @@ export default function BartholomewPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 stagger-appear">
-                  {Object.keys(spendingCategories).map((category) => (
+                  {Object.keys(spendingCategories).map(category => (
                     <div key={category} className="flex items-center space-x-2">
                       <Checkbox
                         id={category}
-                        checked={
-                          spendingCategories[
-                            category as keyof typeof spendingCategories
-                          ]
-                        }
+                        checked={spendingCategories[
+                          category as keyof typeof spendingCategories
+                        ]}
                         onCheckedChange={() => handleCategoryChange(category)}
                       />
                       <Label htmlFor={category} className="capitalize">
@@ -144,7 +199,9 @@ export default function BartholomewPage() {
               </Card>
 
               <Card
-                className={`mb-8 ${animate ? "bartholomew-card" : "opacity-0"}`}
+                className={`mb-8 ${
+                  animate ? "bartholomew-card" : "opacity-0"
+                }`}
                 style={{ animationDelay: "0.5s" }}
               >
                 <CardHeader>
@@ -208,20 +265,11 @@ export default function BartholomewPage() {
             </>
           ) : (
             <div>
-              <h2 className="text-2xl font-bold text-catty-brown mb-6 mt-8">
-                Dr. Bartholomeow's Canadian Credit Card Recommendations
-              </h2>
-
               <div className="space-y-6">
-                {recommendations.map((card, index) => (
+                {recommendations.map((card, idx) => (
                   <CreditCardRecommendation
-                    key={index}
-                    name={card.name}
-                    description={card.description}
-                    benefits={card.benefits}
-                    annualFee={card.annualFee}
-                    interestRate={card.interestRate}
-                    imageUrl={card.imageUrl}
+                    key={idx}
+                    {...card}
                   />
                 ))}
               </div>
@@ -232,17 +280,22 @@ export default function BartholomewPage() {
                   time. Please verify details with the issuing bank before
                   applying.
                 </p>
-
                 <div className="flex justify-between">
                   <Button
-                    onClick={() => setShowResults(false)}
+                    onClick={() => {
+                      setShowResults(false);
+                      stopAllSpeech();
+                    }}
                     variant="outline"
                     className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
                   >
                     Start Over
                   </Button>
                   <Button
-                    onClick={() => navigate("/")}
+                    onClick={() => {
+                      navigate("/");
+                      stopAllSpeech();
+                    }}
                     className="bg-catty-orange hover:bg-catty-brown text-white"
                   >
                     Return Home
@@ -251,6 +304,7 @@ export default function BartholomewPage() {
               </div>
             </div>
           )}
+
         </div>
       </div>
 
@@ -260,7 +314,6 @@ export default function BartholomewPage() {
             src="/src/images/barth_ok.png"
             alt="Dr. Bartholomeow"
             className="w-64 h-64 object-contain transform scale-150"
-            onLoad={() => setShowCredentials(true)}
           />
         </div>
       )}

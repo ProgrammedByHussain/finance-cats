@@ -6,109 +6,135 @@ import CatAdvisor from "@/components/CatAdvisor";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
+import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
 
 export default function PouncePage() {
   const navigate = useNavigate();
+
+  // --- STATE ---
   const [financialData, setFinancialData] = useState<any>(null);
-  const [advisorOpen, setAdvisorOpen] = useState(true);
   const [animate, setAnimate] = useState(false);
-  const [catAdvice, setCatAdvice] = useState<string | undefined>(
+  const [catAdvice, setCatAdvice] = useState<string>(
     "Meow! Upload your spending history CSV, and I'll help you optimize your budget!"
   );
   const [error, setError] = useState<string | null>(null);
-  const [showCredentials, setShowCredentials] = useState(false);
+  const [isSpeechMuted, setIsSpeechMuted] = useState(false);
 
+  // --- EFFECT: trigger animation on mount ---
   useEffect(() => {
-    // Trigger animation after component mount
     setAnimate(true);
   }, []);
 
-  const handleFileUploaded = (data: any) => {
-    console.log("Received data from FileUpload:", data);
+  // --- EFFECT: play advice on change (or when data arrives) ---
+  useEffect(() => {
+    if (!isSpeechMuted && catAdvice) {
+      playCatSpeech("pounce", catAdvice);
+    }
+    return () => {
+      stopAllSpeech();
+    };
+  }, [catAdvice, isSpeechMuted]);
 
+  // --- HANDLER: upload CSV ---
+  const handleFileUploaded = (data: any) => {
     if (!data) {
-      setError(
-        "Unable to analyze the CSV data. Please try another file format."
-      );
+      setError("Unable to analyze the CSV data. Please try another file format.");
       return;
     }
-
     setFinancialData(data);
-
-    // Generate cat advice based on the data
+    // generate advice
     try {
-      const generateCatAdvice = () => {
-        // Check which category has the highest expense
-        const highestCategory =
-          data.spendingInsights?.highestCategory || "unknown";
+      const highest = data.spendingInsights?.highestCategory || "unknown";
+      const tips = data.spendingInsights?.savingsTips || [];
+      const tip = tips.length
+        ? tips[Math.floor(Math.random() * tips.length)]
+        : "Meow! Try to set aside a little more each month for savings!";
 
-        // Get a random tip from the savings tips
-        const savingsTips = data.spendingInsights?.savingsTips || [];
-        const randomTip =
-          savingsTips.length > 0
-            ? savingsTips[Math.floor(Math.random() * savingsTips.length)]
-            : "Meow! Try to set aside a little more each month for savings!";
-
-        // Format the advice with some cat puns
-        return `Meow! I notice your highest spending is in ${highestCategory}. Purr-haps you could consider this tip: ${randomTip}`;
-      };
-
-      setCatAdvice(generateCatAdvice());
-    } catch (error) {
-      console.error("Error generating cat advice:", error);
+      setCatAdvice(
+        `Meow! I notice your highest spending is in ${highest}. Purr-haps you could consider this tip: ${tip}`
+      );
+    } catch {
       setCatAdvice(
         "Meow! I've analyzed your spending, but I'm having trouble coming up with specific advice. Let's work on your budget together!"
       );
     }
   };
 
+  // --- HANDLER: toggle mute/unmute ---
+  const toggleSpeech = () => {
+    if (isSpeechMuted) {
+      setIsSpeechMuted(false);
+      playCatSpeech("pounce", catAdvice);
+    } else {
+      setIsSpeechMuted(true);
+      stopAllSpeech();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-catty-light-gray">
       <Navbar />
+
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
-          {/* --- START: Small cat image and description at the top (like Clawdia) --- */}
-          {!financialData && (
-            <div
-              className={`flex items-center mb-8 ${
-                animate ? "pounce-appear" : "opacity-0"
-              }`}
-            >
-              <img
-                src="/src/images/pounce_ok.png"
-                alt="Sir Pounce"
-                className="w-24 h-24 object-contain mr-4"
-              />
-              <div>
-                <h1 className="text-3xl font-bold text-catty-brown">
-                  Sir Pounce's Budget Optimizer
-                </h1>
-                <p className="text-catty-gray mt-2">
-                  Upload your bank statement CSV and I'll help you identify
-                  savings opportunities with AI!
-                </p>
-              </div>
-            </div>
-          )}
-          {/* --- END: Small cat image and description --- */}
 
-          {/* --- Show credentials plaque at the top when results are shown --- */}
-          {financialData && showCredentials && (
+          {/* TOP BAR: header + volume button */}
+          <div className="flex items-center justify-between mb-6">
+            {!financialData && (
+              <div
+                className={`flex items-center ${
+                  animate ? "pounce-appear" : "opacity-0"
+                }`}
+              >
+                <img
+                  src="/src/images/pounce_ok.png"
+                  alt="Sir Pounce"
+                  className="w-24 h-24 object-contain mr-4"
+                />
+                <div>
+                  <h1 className="text-3xl font-bold text-catty-brown">
+                    Sir Pounce's Budget Optimizer
+                  </h1>
+                  <p className="text-catty-gray mt-2">
+                    Upload your bank statement CSV and I'll help you identify
+                    savings opportunities with AI!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* CREDENTIALS PLAQUE */}
+          {financialData && (
+            <>
             <CatCredentialsPlaque
               name="Sir Pounce"
               degree="M.Sc., Financial Planning"
               school="London School of Economics"
               schoolLogo="/src/images/lse_logo.png"
             />
+          <div className="flex justify-center mt-4 mb-4">
+                <Button variant="ghost" size="icon" onClick={toggleSpeech}>
+                  {isSpeechMuted ? (
+                    <VolumeX className="h-6 w-6 text-catty-gray" />
+                  ) : (
+                    <Volume2 className="h-6 w-6 text-catty-orange" />
+                  )}
+                </Button>
+              </div>
+          </>
           )}
+
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+
+          {/* UPLOAD FORM */}
           {!financialData ? (
             <div
               className={`max-w-md mx-auto ${
@@ -116,7 +142,6 @@ export default function PouncePage() {
               }`}
             >
               <FileUpload onFileUploaded={handleFileUploaded} accept=".csv" />
-
               <div
                 className={`mt-6 text-center ${
                   animate ? "stagger-appear" : "opacity-0"
@@ -125,13 +150,14 @@ export default function PouncePage() {
                 <Button
                   onClick={() => navigate("/")}
                   variant="outline"
-                  className="bg-white border-catty-orange text-catty-brown ho :bg-catty-peach"
+                  className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
                 >
                   Go Back Home
                 </Button>
               </div>
             </div>
           ) : (
+            /* DASHBOARD + NAVIGATION */
             <>
               <div className={`${animate ? "pounce-card" : "opacity-0"}`}>
                 <Dashboard data={financialData} />
@@ -162,19 +188,16 @@ export default function PouncePage() {
         </div>
       </div>
 
-      <CatAdvisor
-        isOpen={advisorOpen}
-        onClose={() => setAdvisorOpen(!advisorOpen)}
-        advice={catAdvice}
-      />
+      {/* TEXT + VOICE ADVISOR */}
+      <CatAdvisor advice={catAdvice} />
 
+      {/* FLOATING FLAVOR IMAGE */}
       {financialData && (
         <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
           <img
             src="/src/images/pounce_ok.png"
             alt="Sir Pounce"
             className="w-64 h-64 object-contain transform scale-150"
-            onLoad={() => setShowCredentials(true)}
           />
         </div>
       )}
