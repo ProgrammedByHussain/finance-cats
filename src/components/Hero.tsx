@@ -1,49 +1,57 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from '@/components/ui/carousel';
-import { Card, CardContent } from '@/components/ui/card';
-import { ChevronRight } from 'lucide-react';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChevronRight } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
 
 // Import cat images
-import barthOk from '@/images/barth_ok.png';
-import pounceOk from '@/images/pounce_ok.png';
-import clawdiaOk from '@/images/clawdia_ok.png';
+import barthOk from "@/images/barth_ok.png";
+import pounceOk from "@/images/pounce_ok.png";
+import clawdiaOk from "@/images/clawdia_ok.png";
 
 export default function Hero() {
+  const navigate = useNavigate();
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+
   const adviceCards = [
     {
       title: "Dr. Bartholameow",
       content: [
         "Expert in financial planning",
         "Specializes in investment strategies",
-        "Helps you build long-term wealth"
+        "Helps you build long-term wealth",
       ],
-      image: barthOk
+      image: barthOk,
+      path: "/bartholomew",
     },
     {
       title: "Sir Pounce",
       content: [
         "Master of budget optimization",
         "Helps identify savings opportunities",
-        "Creates personalized spending plans"
+        "Creates personalized spending plans",
       ],
-      image: pounceOk
+      image: pounceOk,
+      path: "/pounce",
     },
     {
       title: "Dr. Clawdia",
       content: [
         "Debt management specialist",
         "Credit score improvement expert",
-        "Financial wellness coach"
+        "Financial wellness coach",
       ],
-      image: clawdiaOk
-    }
+      image: clawdiaOk,
+      path: "/clawdia",
+    },
   ];
 
   return (
@@ -56,66 +64,89 @@ export default function Hero() {
                 Meet Your Purr-sonal Finance Advisors
               </h1>
               <p className="text-lg text-catty-gray md:text-xl">
-                Our team of feline financial experts helps you track your spending, save money, and make smarter financial decisions.
+                Our team of feline financial experts helps you track your
+                spending, save money, and make smarter financial decisions.
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button className="bg-catty-orange hover:bg-catty-brown text-white px-8 py-6">
+              <Button
+                onClick={() => navigate(adviceCards[0].path)}
+                className="bg-catty-orange hover:bg-catty-brown text-white px-8 py-6"
+              >
                 Get Started
-              </Button>
-              <Button variant="outline" className="border-catty-orange text-catty-brown hover:bg-catty-peach px-8 py-6">
-                Learn More
               </Button>
             </div>
             <div className="flex items-center gap-2 text-sm text-catty-gray">
               <div className="flex -space-x-2">
-                <div className="w-8 h-8 rounded-full bg-catty-orange flex items-center justify-center text-white text-xs">🐱</div>
-                <div className="w-8 h-8 rounded-full bg-catty-brown flex items-center justify-center text-white text-xs">🐾</div>
-                <div className="w-8 h-8 rounded-full bg-catty-peach flex items-center justify-center text-white text-xs">💰</div>
+                <div className="w-8 h-8 rounded-full bg-catty-orange flex items-center justify-center text-white text-xs">
+                  🐱
+                </div>
+                <div className="w-8 h-8 rounded-full bg-catty-brown flex items-center justify-center text-white text-xs">
+                  🐾
+                </div>
+                <div className="w-8 h-8 rounded-full bg-catty-peach flex items-center justify-center text-white text-xs">
+                  💰
+                </div>
               </div>
               <span>Trusted by thousands of financially savvy cat lovers</span>
             </div>
           </div>
 
           <div className="relative">
-            <Carousel className="w-full max-w-md mx-auto">
+            <Carousel
+              ref={emblaRef}
+              opts={{
+                loop: true,
+                align: "center",
+              }}
+              className="w-full max-w-md mx-auto"
+            >
               <CarouselContent className="-ml-2 md:-ml-4">
                 {adviceCards.map((card, index) => (
                   <CarouselItem key={index} className="pl-2 md:pl-4 relative">
                     <div className="relative">
-                      {/* Hint cards in the background */}
                       {index === 0 && (
                         <>
                           <div className="absolute -right-4 -top-3 w-full h-full bg-catty-cream rounded-lg transform rotate-3 z-0"></div>
                           <div className="absolute -right-2 -top-1 w-full h-full bg-catty-peach/50 rounded-lg transform rotate-1 z-0"></div>
                         </>
                       )}
-                      <Card className="relative bg-white rounded-lg p-6 shadow-lg z-10 transition-all duration-300 hover:shadow-xl">
+                      <Card
+                        className="relative bg-white rounded-lg p-6 shadow-lg z-10 transition-all duration-300 hover:shadow-xl cursor-pointer"
+                        onClick={() => navigate(card.path)}
+                      >
                         <CardContent className="p-0">
                           {/* Cat image */}
                           <div className="relative h-64 w-full mb-6">
-                            <img 
-                              src={card.image} 
+                            <img
+                              src={card.image}
                               alt={card.title}
                               className="w-full h-full object-contain"
                             />
                           </div>
-                          
-                          <h3 className="text-xl font-bold text-catty-brown text-center">{card.title}</h3>
+
+                          <h3 className="text-xl font-bold text-catty-brown text-center">
+                            {card.title}
+                          </h3>
                           <ul className="mt-4 space-y-2">
                             {card.content.map((item, idx) => (
                               <li key={idx} className="flex items-center gap-2">
                                 <div className="w-5 h-5 rounded-full bg-catty-peach flex items-center justify-center">
-                                  <span className="text-catty-brown text-xs">✓</span>
+                                  <span className="text-catty-brown text-xs">
+                                    ✓
+                                  </span>
                                 </div>
                                 <span className="text-catty-gray">{item}</span>
                               </li>
                             ))}
                           </ul>
-                          
-                          <div className="mt-4 text-center text-catty-gray text-sm flex items-center justify-center gap-2">
-                            <span>Swipe to meet our other advisors</span>
-                            <ChevronRight size={16} className="text-catty-orange animate-pulse" />
+
+                          <div className="mt-4 text-center text-catty-orange text-sm flex items-center justify-center gap-2">
+                            <span>Click to get started</span>
+                            <ChevronRight
+                              size={16}
+                              className="text-catty-orange animate-pulse"
+                            />
                           </div>
                         </CardContent>
                       </Card>
@@ -125,7 +156,7 @@ export default function Hero() {
               </CarouselContent>
               <CarouselPrevious className="left-0 bg-white text-catty-orange border-catty-orange" />
               <CarouselNext className="right-0 bg-white text-catty-orange border-catty-orange" />
-              
+
               <div className="flex justify-center mt-4 gap-1">
                 {adviceCards.map((_, index) => (
                   <div

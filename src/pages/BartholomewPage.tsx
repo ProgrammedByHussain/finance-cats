@@ -1,0 +1,145 @@
+import React, { useState } from "react";
+import Navbar from "@/components/Navbar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useNavigate } from "react-router-dom";
+
+export default function BartholomewPage() {
+  const navigate = useNavigate();
+  const [spendingCategories, setSpendingCategories] = useState({
+    dining: false,
+    travel: false,
+    groceries: false,
+    gas: false,
+    online: false,
+    entertainment: false,
+  });
+
+  const [cardGoal, setCardGoal] = useState("cashback");
+
+  const handleCategoryChange = (category: string) => {
+    setSpendingCategories((prev) => ({
+      ...prev,
+      [category]: !prev[category as keyof typeof prev],
+    }));
+  };
+
+  const handleSubmit = () => {
+    // Process the data here
+    console.log("Spending categories:", spendingCategories);
+    console.log("Card goal:", cardGoal);
+
+    // Show results
+    alert(
+      "Dr. Bartholameow says: Based on your spending habits and goals, I recommend a card with strong rewards in " +
+        Object.keys(spendingCategories)
+          .filter(
+            (key) => spendingCategories[key as keyof typeof spendingCategories]
+          )
+          .join(", ") +
+        " and focuses on " +
+        cardGoal +
+        "!"
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-catty-light-gray">
+      <Navbar />
+
+      <div className="container py-12 px-4 md:px-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center mb-8">
+            <img
+              src="/src/images/barth_ok.png"
+              alt="Dr. Bartholameow"
+              className="w-24 h-24 object-contain mr-4"
+            />
+            <div>
+              <h1 className="text-3xl font-bold text-catty-brown">
+                Dr. Bartholameow's Credit Card Advisor
+              </h1>
+              <p className="text-catty-gray mt-2">
+                Let me help you find the purrfect credit card based on your
+                spending habits and goals.
+              </p>
+            </div>
+          </div>
+
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-xl text-catty-brown">
+                Where do you spend the most?
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {Object.keys(spendingCategories).map((category) => (
+                <div key={category} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={category}
+                    checked={
+                      spendingCategories[
+                        category as keyof typeof spendingCategories
+                      ]
+                    }
+                    onCheckedChange={() => handleCategoryChange(category)}
+                  />
+                  <Label htmlFor={category} className="capitalize">
+                    {category}
+                  </Label>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-xl text-catty-brown">
+                What are you looking for in a credit card?
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup value={cardGoal} onValueChange={setCardGoal}>
+                <div className="flex items-center space-x-2 mb-4">
+                  <RadioGroupItem value="cashback" id="cashback" />
+                  <Label htmlFor="cashback">Cash Back</Label>
+                </div>
+                <div className="flex items-center space-x-2 mb-4">
+                  <RadioGroupItem value="points" id="points" />
+                  <Label htmlFor="points">Travel Points</Label>
+                </div>
+                <div className="flex items-center space-x-2 mb-4">
+                  <RadioGroupItem value="lowinterest" id="lowinterest" />
+                  <Label htmlFor="lowinterest">Low Interest Rate</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="rewards" id="rewards" />
+                  <Label htmlFor="rewards">Specialized Rewards</Label>
+                </div>
+              </RadioGroup>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-between">
+            <Button
+              onClick={() => navigate("/")}
+              variant="outline"
+              className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
+            >
+              Go Back
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              className="bg-catty-orange hover:bg-catty-brown text-white"
+            >
+              Get Recommendations
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
