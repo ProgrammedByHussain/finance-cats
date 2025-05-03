@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,12 @@ export default function BartholomewPage() {
   });
 
   const [cardGoal, setCardGoal] = useState("cashback");
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation after component mount
+    setAnimate(true);
+  }, []);
 
   const handleCategoryChange = (category: string) => {
     setSpendingCategories((prev) => ({
@@ -52,7 +58,11 @@ export default function BartholomewPage() {
 
       <div className="container py-12 px-4 md:px-6">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center mb-8">
+          <div
+            className={`flex items-center mb-8 ${
+              animate ? "bartholomew-appear" : "opacity-0"
+            }`}
+          >
             <img
               src="/src/images/barth_ok.png"
               alt="Dr. Bartholameow"
@@ -69,13 +79,15 @@ export default function BartholomewPage() {
             </div>
           </div>
 
-          <Card className="mb-8">
+          <Card
+            className={`mb-8 ${animate ? "bartholomew-card" : "opacity-0"}`}
+          >
             <CardHeader>
               <CardTitle className="text-xl text-catty-brown">
                 Where do you spend the most?
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 stagger-appear">
               {Object.keys(spendingCategories).map((category) => (
                 <div key={category} className="flex items-center space-x-2">
                   <Checkbox
@@ -95,14 +107,21 @@ export default function BartholomewPage() {
             </CardContent>
           </Card>
 
-          <Card className="mb-8">
+          <Card
+            className={`mb-8 ${animate ? "bartholomew-card" : "opacity-0"}`}
+            style={{ animationDelay: "0.5s" }}
+          >
             <CardHeader>
               <CardTitle className="text-xl text-catty-brown">
                 What are you looking for in a credit card?
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <RadioGroup value={cardGoal} onValueChange={setCardGoal}>
+              <RadioGroup
+                value={cardGoal}
+                onValueChange={setCardGoal}
+                className="stagger-appear"
+              >
                 <div className="flex items-center space-x-2 mb-4">
                   <RadioGroupItem value="cashback" id="cashback" />
                   <Label htmlFor="cashback">Cash Back</Label>
@@ -123,7 +142,11 @@ export default function BartholomewPage() {
             </CardContent>
           </Card>
 
-          <div className="flex justify-between">
+          <div
+            className={`flex justify-between ${
+              animate ? "stagger-appear" : "opacity-0"
+            }`}
+          >
             <Button
               onClick={() => navigate("/")}
               variant="outline"
