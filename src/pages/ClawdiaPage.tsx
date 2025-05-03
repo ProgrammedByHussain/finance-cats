@@ -106,6 +106,14 @@ export default function ClawdiaPage() {
             />
           </div>
         </div>
+
+        <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
+          <img
+            src="/src/images/clawdia_ok.png"
+            alt="Dr. Clawdia"
+            className="w-64 h-64 object-contain transform scale-150"
+          />
+        </div>
       </div>
     );
   }

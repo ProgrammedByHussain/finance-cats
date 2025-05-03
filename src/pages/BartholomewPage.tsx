@@ -240,6 +240,16 @@ export default function BartholomewPage() {
           )}
         </div>
       </div>
+
+      {showResults && (
+        <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
+          <img
+            src="/src/images/barth_ok.png"
+            alt="Dr. Bartholomeow"
+            className="w-64 h-64 object-contain transform scale-150"
+          />
+        </div>
+      )}
     </div>
   );
 }
