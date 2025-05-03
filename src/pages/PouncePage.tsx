@@ -6,7 +6,8 @@ import CatAdvisor from "@/components/CatAdvisor";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Volume2, VolumeX } from "lucide-react";
+import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
 
 export default function PouncePage() {
   const navigate = useNavigate();
@@ -17,11 +18,47 @@ export default function PouncePage() {
     "Meow! Upload your spending history CSV, and I'll help you optimize your budget!"
   );
   const [error, setError] = useState<string | null>(null);
+  const [isSpeechMuted, setIsSpeechMuted] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mount
     setAnimate(true);
+
+    // Clean up speech when component unmounts
+    return () => {
+      stopAllSpeech();
+    };
   }, []);
+
+  // Play speech when financial data is available
+  useEffect(() => {
+    if (financialData && !isSpeechMuted) {
+      // Generate a custom message based on financial data
+      let speechText = `Meow there! Sir Pounce at your service. `;
+
+      if (financialData.spendingInsights) {
+        const { highestCategory, savingsTips } = financialData.spendingInsights;
+        speechText += `I've analyzed your spending habits and found some interesting patterns. `;
+        speechText += `Your highest spending category is ${highestCategory}. `;
+
+        if (savingsTips && savingsTips.length > 0) {
+          speechText += `Here's a tip: ${savingsTips[0]} `;
+        }
+
+        speechText += `Your current savings rate is ${financialData.savingsRate}%. `;
+
+        if (financialData.savingsRate < 20) {
+          speechText += `I recommend trying to save at least 20% of your income for better financial security.`;
+        } else {
+          speechText += `Great job on your savings! Keep up the good work!`;
+        }
+      } else {
+        speechText += `I've analyzed your spending patterns and have some suggestions to optimize your budget!`;
+      }
+
+      playCatSpeech("pounce", speechText);
+    }
+  }, [financialData, isSpeechMuted]);
 
   const handleFileUploaded = (data: any) => {
     console.log("Received data from FileUpload:", data);
@@ -62,6 +99,18 @@ export default function PouncePage() {
     }
   };
 
+  const toggleSpeech = () => {
+    if (isSpeechMuted) {
+      setIsSpeechMuted(false);
+      if (financialData) {
+        playCatSpeech("pounce");
+      }
+    } else {
+      setIsSpeechMuted(true);
+      stopAllSpeech();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-catty-light-gray">
       <Navbar />
@@ -78,10 +127,24 @@ export default function PouncePage() {
               alt="Sir Pounce"
               className="w-24 h-24 object-contain mr-4"
             />
-            <div>
-              <h1 className="text-3xl font-bold text-catty-brown">
-                Sir Pounce's Budget Analyzer
-              </h1>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-catty-brown">
+                  Sir Pounce's Budget Analyzer
+                </h1>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleSpeech}
+                  className="ml-2"
+                >
+                  {isSpeechMuted ? (
+                    <VolumeX className="h-5 w-5 text-catty-gray" />
+                  ) : (
+                    <Volume2 className="h-5 w-5 text-catty-orange" />
+                  )}
+                </Button>
+              </div>
               <p className="text-catty-gray mt-2">
                 Upload your bank statement CSV and I'll help you identify
                 savings opportunities with AI!
@@ -121,6 +184,18 @@ export default function PouncePage() {
           ) : (
             <>
               <div className={`${animate ? "pounce-card" : "opacity-0"}`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold text-catty-brown">
+                    Your Financial Dashboard
+                  </h2>
+                  <Button variant="ghost" size="icon" onClick={toggleSpeech}>
+                    {isSpeechMuted ? (
+                      <VolumeX className="h-5 w-5 text-catty-gray" />
+                    ) : (
+                      <Volume2 className="h-5 w-5 text-catty-orange" />
+                    )}
+                  </Button>
+                </div>
                 <Dashboard data={financialData} />
               </div>
 
@@ -130,14 +205,20 @@ export default function PouncePage() {
                 }`}
               >
                 <Button
-                  onClick={() => setFinancialData(null)}
+                  onClick={() => {
+                    setFinancialData(null);
+                    stopAllSpeech();
+                  }}
                   variant="outline"
                   className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach mr-4"
                 >
                   Upload Another CSV
                 </Button>
                 <Button
-                  onClick={() => navigate("/")}
+                  onClick={() => {
+                    navigate("/");
+                    stopAllSpeech();
+                  }}
                   variant="outline"
                   className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
                 >

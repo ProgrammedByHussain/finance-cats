@@ -9,8 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { playMeowSound } from "@/utils/sound";
 import { getCreditCardRecommendations } from "@/services/geminiService";
 import { CreditCardRecommendation } from "@/components/CreditCardRecommendation";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
 
 export default function BartholomewPage() {
   const navigate = useNavigate();
@@ -29,11 +30,36 @@ export default function BartholomewPage() {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSpeechMuted, setIsSpeechMuted] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mount
     setAnimate(true);
+
+    // Clean up speech when component unmounts
+    return () => {
+      stopAllSpeech();
+    };
   }, []);
+
+  // Play speech when results are shown
+  useEffect(() => {
+    if (showResults && !isSpeechMuted) {
+      // Generate a custom message based on recommendations
+      let speechText = `Hello there! I'm Doctor Bartholomeow, your credit card expert. `;
+
+      if (recommendations.length > 0) {
+        speechText += `Based on your preferences, I've found ${recommendations.length} purr-fect options for you. `;
+        speechText += `My top recommendation is the ${recommendations[0].name}. `;
+        speechText += `This card ${recommendations[0].description.toLowerCase()} `;
+        speechText += `and offers benefits like ${recommendations[0].benefits[0].toLowerCase()}.`;
+      } else {
+        speechText += `I've analyzed your preferences and have some paw-some recommendations for you!`;
+      }
+
+      playCatSpeech("bartholomew", speechText);
+    }
+  }, [showResults, isSpeechMuted, recommendations]);
 
   const handleCategoryChange = (category: string) => {
     setSpendingCategories((prev) => ({
@@ -65,6 +91,18 @@ export default function BartholomewPage() {
     }
   };
 
+  const toggleSpeech = () => {
+    if (isSpeechMuted) {
+      setIsSpeechMuted(false);
+      if (showResults) {
+        playCatSpeech("bartholomew");
+      }
+    } else {
+      setIsSpeechMuted(true);
+      stopAllSpeech();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-catty-light-gray">
       <Navbar />
@@ -81,10 +119,24 @@ export default function BartholomewPage() {
               alt="Dr. Bartholomeow"
               className="w-24 h-24 object-contain mr-4"
             />
-            <div>
-              <h1 className="text-3xl font-bold text-catty-brown">
-                Dr. Bartholomeow's Canadian Credit Card Advisor
-              </h1>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-catty-brown">
+                  Dr. Bartholomeow's Canadian Credit Card Advisor
+                </h1>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleSpeech}
+                  className="ml-2"
+                >
+                  {isSpeechMuted ? (
+                    <VolumeX className="h-5 w-5 text-catty-gray" />
+                  ) : (
+                    <Volume2 className="h-5 w-5 text-catty-orange" />
+                  )}
+                </Button>
+              </div>
               <p className="text-catty-gray mt-2">
                 Let me help you find the purrfect Canadian credit card based on
                 your spending habits and goals.
@@ -195,9 +247,18 @@ export default function BartholomewPage() {
             </>
           ) : (
             <div>
-              <h2 className="text-2xl font-bold text-catty-brown mb-6">
-                Dr. Bartholomeow's Canadian Credit Card Recommendations
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-catty-brown">
+                  Dr. Bartholomeow's Canadian Credit Card Recommendations
+                </h2>
+                <Button variant="ghost" size="icon" onClick={toggleSpeech}>
+                  {isSpeechMuted ? (
+                    <VolumeX className="h-5 w-5 text-catty-gray" />
+                  ) : (
+                    <Volume2 className="h-5 w-5 text-catty-orange" />
+                  )}
+                </Button>
+              </div>
 
               <div className="space-y-6">
                 {recommendations.map((card, index) => (
@@ -222,14 +283,20 @@ export default function BartholomewPage() {
 
                 <div className="flex justify-between">
                   <Button
-                    onClick={() => setShowResults(false)}
+                    onClick={() => {
+                      setShowResults(false);
+                      stopAllSpeech();
+                    }}
                     variant="outline"
                     className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
                   >
                     Start Over
                   </Button>
                   <Button
-                    onClick={() => navigate("/")}
+                    onClick={() => {
+                      navigate("/");
+                      stopAllSpeech();
+                    }}
                     className="bg-catty-orange hover:bg-catty-brown text-white"
                   >
                     Return Home

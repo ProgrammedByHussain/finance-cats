@@ -10,8 +10,9 @@ import { useNavigate } from "react-router-dom";
 import { playMeowSound } from "@/utils/sound";
 import InvestmentDashboard from "@/components/InvestmentDashboard";
 import { getInvestmentRecommendations } from "@/services/geminiService";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { playCatSpeech, stopAllSpeech } from "@/services/elevenlabsService";
 
 export default function ClawdiaPage() {
   const navigate = useNavigate();
@@ -24,11 +25,55 @@ export default function ClawdiaPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiData, setApiData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSpeechMuted, setIsSpeechMuted] = useState(false);
 
   useEffect(() => {
     // Trigger animation after component mount
     setAnimate(true);
+
+    // Clean up speech when component unmounts
+    return () => {
+      stopAllSpeech();
+    };
   }, []);
+
+  // Play speech when results are shown
+  useEffect(() => {
+    if (showResults && !isSpeechMuted && apiData) {
+      // Generate a custom message based on investment data
+      let speechText = `Greetings, I'm Doctor Clawdia. `;
+
+      speechText += `I've created an investment portfolio tailored to your financial goals and risk tolerance. `;
+
+      if (apiData.portfolioAllocation) {
+        // Get the highest allocation asset
+        const highestAllocation = [...apiData.portfolioAllocation].sort(
+          (a, b) => b.value - a.value
+        )[0];
+
+        speechText += `Based on your ${investmentGoal} goal and ${riskTolerance[0]}/10 risk tolerance, `;
+        speechText += `I've allocated ${highestAllocation.value}% of your portfolio to ${highestAllocation.name}. `;
+
+        if (apiData.annualReturn) {
+          speechText += `This strategy has a projected annual return of ${apiData.annualReturn}%, `;
+          speechText += `which would grow your $${investmentAmount} investment to $${Math.round(
+            apiData.totalReturn
+          )} over ${apiData.years} years. `;
+        }
+
+        speechText += `Let's review my investment recommendations!`;
+      }
+
+      playCatSpeech("clawdia", speechText);
+    }
+  }, [
+    showResults,
+    isSpeechMuted,
+    apiData,
+    investmentAmount,
+    investmentGoal,
+    riskTolerance,
+  ]);
 
   const handleSubmit = async () => {
     playMeowSound();
@@ -56,6 +101,18 @@ export default function ClawdiaPage() {
     }
   };
 
+  const toggleSpeech = () => {
+    if (isSpeechMuted) {
+      setIsSpeechMuted(false);
+      if (showResults && apiData) {
+        playCatSpeech("clawdia");
+      }
+    } else {
+      setIsSpeechMuted(true);
+      stopAllSpeech();
+    }
+  };
+
   if (showResults) {
     return (
       <div className="min-h-screen bg-catty-light-gray">
@@ -70,16 +127,28 @@ export default function ClawdiaPage() {
                   className="w-24 h-24 object-contain mr-4"
                 />
                 <div>
-                  <h1 className="text-3xl font-bold text-catty-brown">
-                    Your Investment Plan
-                  </h1>
+                  <div className="flex items-center">
+                    <h1 className="text-3xl font-bold text-catty-brown mr-3">
+                      Your Investment Plan
+                    </h1>
+                    <Button variant="ghost" size="icon" onClick={toggleSpeech}>
+                      {isSpeechMuted ? (
+                        <VolumeX className="h-5 w-5 text-catty-gray" />
+                      ) : (
+                        <Volume2 className="h-5 w-5 text-catty-orange" />
+                      )}
+                    </Button>
+                  </div>
                   <p className="text-catty-gray mt-2">
                     Based on your investment preferences and goals
                   </p>
                 </div>
               </div>
               <Button
-                onClick={() => setShowResults(false)}
+                onClick={() => {
+                  setShowResults(false);
+                  stopAllSpeech();
+                }}
                 variant="outline"
                 className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
               >
@@ -134,10 +203,24 @@ export default function ClawdiaPage() {
               alt="Dr. Clawdia"
               className="w-24 h-24 object-contain mr-4"
             />
-            <div>
-              <h1 className="text-3xl font-bold text-catty-brown">
-                Dr. Clawdia's Investment Planner
-              </h1>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold text-catty-brown">
+                  Dr. Clawdia's Investment Planner
+                </h1>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleSpeech}
+                  className="ml-2"
+                >
+                  {isSpeechMuted ? (
+                    <VolumeX className="h-5 w-5 text-catty-gray" />
+                  ) : (
+                    <Volume2 className="h-5 w-5 text-catty-orange" />
+                  )}
+                </Button>
+              </div>
               <p className="text-catty-gray mt-2">
                 Let me help you create a purrfect investment strategy based on
                 your goals and risk tolerance.
