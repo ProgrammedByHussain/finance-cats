@@ -30,58 +30,41 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
       return;
     }
 
-    // Check if the file is a CSV
-    const fileType = file.type;
-    const validTypes = ['text/csv'];
-    
-    if (!validTypes.includes(fileType)) {
-      toast.error("Please upload a CSV file only");
-      return;
-    }
-
     setIsUploading(true);
     setUploadProgress(0);
 
     try {
-      // Read the file content
-      const text = await file.text();
-      
-      // Simulate upload progress
-      const interval = setInterval(() => {
-        setUploadProgress(prev => {
-          const newProgress = prev + 25;
-          if (newProgress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              setIsUploading(false);
-              simulateProcessing();
-            }, 500);
-          }
-          return Math.min(newProgress, 100);
-        });
-      }, 500);
+      const formData = new FormData();
+      formData.append('file', file);
 
-      toast.success("File processed successfully!");
+      const response = await fetch('http://localhost:5000/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      toast.success("File uploaded successfully!");
+      setIsUploading(false);
+      setUploadProgress(100);
+      
+      // Simulate processing
+      setTimeout(() => {
+        const mockData = generateMockFinancialData();
+        onFileUploaded(mockData);
+        uiToast({
+          title: "Bank Statement Analyzed!",
+          description: "Whiskers has reviewed your financial data."
+        });
+      }, 1500);
+
     } catch (error) {
-      console.error('Error processing file:', error);
-      toast.error("Error processing the file. Please try again.");
+      console.error('Error uploading file:', error);
+      toast.error("Error uploading the file. Please try again.");
       setIsUploading(false);
     }
-  };
-
-  const simulateProcessing = () => {
-    toast.success("File uploaded successfully!");
-    
-    // Simulate processing and returning mock data
-    const mockData = generateMockFinancialData();
-    
-    setTimeout(() => {
-      onFileUploaded(mockData);
-      uiToast({
-        title: "Bank Statement Analyzed!",
-        description: "Whiskers has reviewed your financial data."
-      });
-    }, 1500);
   };
 
   return (
