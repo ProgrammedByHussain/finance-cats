@@ -31,9 +31,9 @@ export default function Hero() {
     {
       title: "Dr. Bartholomeow",
       content: [
-        "Expert in financial planning",
-        "Specializes in investment strategies",
-        "Helps you build long-term wealth",
+        "Debt management specialist",
+        "Credit score improvement expert",
+        "Financial wellness coach",
       ],
       image: barthOk,
       path: "/bartholomew",
@@ -51,9 +51,9 @@ export default function Hero() {
     {
       title: "Dr. Clawdia",
       content: [
-        "Debt management specialist",
-        "Credit score improvement expert",
-        "Financial wellness coach",
+        "Expert in financial planning",
+        "Specializes in investment strategies",
+        "Helps you build long-term wealth",
       ],
       image: clawdiaOk,
       path: "/clawdia",

@@ -19,27 +19,6 @@ const Index = () => {
               <span className="font-bold text-catty-brown">FinanceCats</span>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-4 md:gap-8">
-              <a
-                href="#"
-                className="text-catty-gray hover:text-catty-brown text-sm"
-              >
-                Terms
-              </a>
-              <a
-                href="#"
-                className="text-catty-gray hover:text-catty-brown text-sm"
-              >
-                Privacy
-              </a>
-              <a
-                href="#"
-                className="text-catty-gray hover:text-catty-brown text-sm"
-              >
-                Support
-              </a>
-            </div>
-
             <div className="mt-4 md:mt-0 text-xs text-catty-gray">
               © {new Date().getFullYear()} FinanceCats. All rights reserved.
             </div>
