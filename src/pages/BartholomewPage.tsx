@@ -149,7 +149,7 @@ export default function BartholomewPage() {
               }`}
             >
               <img
-                src="/public/images/barth_ok.png"
+                src="/images/barth_ok.png"
                 alt="Dr. Bartholomeow"
                 className="w-24 h-24 object-contain mr-4"
               />
@@ -186,7 +186,7 @@ export default function BartholomewPage() {
                 name="Dr. Bartholomeow"
                 degree="Ph.D., Quantitative Finance & Risk Management"
                 school="University of Oxford"
-                schoolLogo="/public/images/oxford_logo.png"
+                schoolLogo="/images/oxford_logo.png"
               />
               <div className="flex justify-center mt-4 mb-6">
                 <Button variant="ghost" size="icon" onClick={toggleSpeech}>

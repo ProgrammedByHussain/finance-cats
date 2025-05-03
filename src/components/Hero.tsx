@@ -13,9 +13,9 @@ import { ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 
 // Import cat images
-import barthOk from "/public/images/barth_ok.png";
-import pounceOk from "/public/images/pounce_ok.png";
-import clawdiaOk from "/public/images/clawdia_ok.png";
+import barthOk from "/images/barth_ok.png";
+import pounceOk from "/images/pounce_ok.png";
+import clawdiaOk from "/images/clawdia_ok.png";
 
 export default function Hero() {
   const navigate = useNavigate();
