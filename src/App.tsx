@@ -18,7 +18,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <PageTransition>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/bartholomew" element={<BartholomewPage />} />
@@ -26,7 +25,6 @@ const App = () => (
             <Route path="/clawdia" element={<ClawdiaPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </PageTransition>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
