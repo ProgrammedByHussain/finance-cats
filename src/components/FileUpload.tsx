@@ -9,6 +9,7 @@ import { playMeowSound } from '@/utils/sound';
 
 interface FileUploadProps {
   onFileUploaded: (results: any) => void;
+  accept?: string;
 }
 
 export default function FileUpload({ onFileUploaded }: FileUploadProps) {
@@ -29,13 +30,7 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
       return;
     }
 
-<<<<<<< HEAD
     // Check if the file is a CSV
-=======
-    playMeowSound();
-
-    // Check if the file is a PDF or CSV
->>>>>>> 982109b6c4c6984ecaecc3fdbc4e36a26724fcce
     const fileType = file.type;
     const validTypes = ['text/csv'];
     

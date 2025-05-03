@@ -64,17 +64,8 @@ export default function PouncePage() {
           </div>
 
           {!financialData ? (
-<<<<<<< HEAD
-            <div className="max-w-md mx-auto">
+            <div className={`max-w-md mx-auto ${animate ? "pounce-card" : "opacity-0"}`}>
               <FileUpload onFileUploaded={handleFileUploaded} accept=".csv" />
-=======
-            <div
-              className={`max-w-md mx-auto ${
-                animate ? "pounce-card" : "opacity-0"
-              }`}
-            >
-              <FileUpload onFileUploaded={handleFileUploaded} />
->>>>>>> 982109b6c4c6984ecaecc3fdbc4e36a26724fcce
 
               <div
                 className={`mt-6 text-center ${
@@ -104,15 +95,9 @@ export default function PouncePage() {
                 <Button
                   onClick={() => navigate("/")}
                   variant="outline"
-                  className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach mr-4"
+                  className="bg-white border-catty-orange text-catty-brown hover:bg-catty-peach"
                 >
                   Go Back Home
-                </Button>
-                <Button
-                  onClick={() => setFinancialData(null)}
-                  className="bg-catty-orange hover:bg-catty-brown text-white"
-                >
-                  Upload Another File
                 </Button>
               </div>
             </>
