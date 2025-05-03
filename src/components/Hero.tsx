@@ -29,7 +29,7 @@ export default function Hero() {
 
   const adviceCards = [
     {
-      title: "Dr. Bartholameow",
+      title: "Dr. Bartholomeow",
       content: [
         "Expert in financial planning",
         "Specializes in investment strategies",

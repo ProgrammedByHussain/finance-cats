@@ -58,7 +58,7 @@ export default function BartholomewPage() {
     } catch (error) {
       console.error("Error getting recommendations:", error);
       setError(
-        "Meow! Dr. Bartholameow had trouble analyzing your preferences. Please check if the Gemini API key is configured correctly."
+        "Meow! Dr. Bartholomeow had trouble analyzing your preferences. Please check if the Gemini API key is configured correctly."
       );
     } finally {
       setIsLoading(false);
@@ -78,12 +78,12 @@ export default function BartholomewPage() {
           >
             <img
               src="/src/images/barth_ok.png"
-              alt="Dr. Bartholameow"
+              alt="Dr. Bartholomeow"
               className="w-24 h-24 object-contain mr-4"
             />
             <div>
               <h1 className="text-3xl font-bold text-catty-brown">
-                Dr. Bartholameow's Canadian Credit Card Advisor
+                Dr. Bartholomeow's Canadian Credit Card Advisor
               </h1>
               <p className="text-catty-gray mt-2">
                 Let me help you find the purrfect Canadian credit card based on
@@ -196,7 +196,7 @@ export default function BartholomewPage() {
           ) : (
             <div>
               <h2 className="text-2xl font-bold text-catty-brown mb-6">
-                Dr. Bartholameow's Canadian Credit Card Recommendations
+                Dr. Bartholomeow's Canadian Credit Card Recommendations
               </h2>
 
               <div className="space-y-6">
