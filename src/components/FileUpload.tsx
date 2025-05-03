@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -23,38 +22,49 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) {
       toast.error("Please select a file first!");
       return;
     }
 
-    // Check if the file is a PDF or CSV
+    // Check if the file is a CSV
     const fileType = file.type;
-    const validTypes = ['application/pdf', 'text/csv'];
+    const validTypes = ['text/csv'];
     
     if (!validTypes.includes(fileType)) {
-      toast.error("Please upload a PDF or CSV file only");
+      toast.error("Please upload a CSV file only");
       return;
     }
 
     setIsUploading(true);
     setUploadProgress(0);
 
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        const newProgress = prev + 25;
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setIsUploading(false);
-            simulateProcessing();
-          }, 500);
-        }
-        return Math.min(newProgress, 100);
-      });
-    }, 500);
+    try {
+      // Read the file content
+      const text = await file.text();
+      
+      // Simulate upload progress
+      const interval = setInterval(() => {
+        setUploadProgress(prev => {
+          const newProgress = prev + 25;
+          if (newProgress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              setIsUploading(false);
+              simulateProcessing();
+            }, 500);
+          }
+          return Math.min(newProgress, 100);
+        });
+      }, 500);
+
+      toast.success("File processed successfully!");
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast.error("Error processing the file. Please try again.");
+      setIsUploading(false);
+    }
   };
 
   const simulateProcessing = () => {
@@ -76,7 +86,7 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
     <Card className="p-6 bg-white shadow-md border-catty-cream border-2">
       <h2 className="text-xl font-semibold text-catty-brown mb-4">Upload Your Bank Statement</h2>
       <p className="text-catty-gray mb-6">
-        Upload a PDF or CSV file of your bank statement for Whiskers to analyze your finances.
+        Upload a CSV file of your bank statement for Whiskers to analyze your finances.
       </p>
 
       <div className="space-y-4">
@@ -89,21 +99,22 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
           ) : (
             <div className="space-y-2">
               <p className="text-sm">Drag and drop your file here, or click to browse</p>
-              <p className="text-xs text-catty-gray">Supports PDF, CSV</p>
+              <p className="text-xs text-catty-gray">Supports CSV</p>
             </div>
           )}
-          <Input 
-            type="file" 
-            onChange={handleFileChange} 
-            className="hidden"
-            id="file-upload"
-            accept=".pdf,.csv"
-          />
-          <label htmlFor="file-upload">
+          <label htmlFor="file-upload" className="cursor-pointer">
+            <Input 
+              type="file" 
+              id="file-upload"
+              onChange={handleFileChange}
+              accept=".csv,text/csv"
+              className="sr-only"
+            />
             <Button 
               type="button" 
               variant="outline" 
               className="mt-4 bg-catty-peach hover:bg-catty-orange text-catty-brown border-none"
+              onClick={() => document.getElementById('file-upload')?.click()}
             >
               Browse Files
             </Button>

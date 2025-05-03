@@ -55,7 +55,7 @@ export default function PouncePage() {
 
           {!financialData ? (
             <div className="max-w-md mx-auto">
-              <FileUpload onFileUploaded={handleFileUploaded} />
+              <FileUpload onFileUploaded={handleFileUploaded} accept=".csv" />
 
               <div className="mt-6 text-center">
                 <Button
