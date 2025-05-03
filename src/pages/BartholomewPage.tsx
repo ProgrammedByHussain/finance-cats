@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useNavigate } from "react-router-dom";
+import { playMeowSound } from "@/utils/sound";
 
 export default function BartholomewPage() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export default function BartholomewPage() {
   };
 
   const handleSubmit = () => {
+    playMeowSound();
     // Process the data here
     console.log("Spending categories:", spendingCategories);
     console.log("Card goal:", cardGoal);

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useToast } from '@/components/ui/use-toast';
 import { Progress } from '@/components/ui/progress';
+import { playMeowSound } from '@/utils/sound';
 
 interface FileUploadProps {
   onFileUploaded: (results: any) => void;
@@ -28,6 +28,8 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
       toast.error("Please select a file first!");
       return;
     }
+
+    playMeowSound();
 
     // Check if the file is a PDF or CSV
     const fileType = file.type;

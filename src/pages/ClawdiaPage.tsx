@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { useNavigate } from "react-router-dom";
+import { playMeowSound } from "@/utils/sound";
 
 export default function ClawdiaPage() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export default function ClawdiaPage() {
   }, []);
 
   const handleSubmit = () => {
+    playMeowSound();
     // Process the investment data
     console.log("Investment amount:", investmentAmount);
     console.log("Risk tolerance:", riskTolerance[0]);
