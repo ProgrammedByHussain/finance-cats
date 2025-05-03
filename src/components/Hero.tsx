@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,12 @@ import clawdiaOk from "@/images/clawdia_ok.png";
 export default function Hero() {
   const navigate = useNavigate();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation after component mount
+    setAnimate(true);
+  }, []);
 
   const adviceCards = [
     {
@@ -60,15 +66,27 @@ export default function Hero() {
         <div className="grid gap-6 md:grid-cols-2 md:gap-12 items-center">
           <div className="space-y-6">
             <div className="space-y-3">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-catty-brown">
+              <h1
+                className={`text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-catty-brown ${
+                  animate ? "hero-title" : "opacity-0"
+                }`}
+              >
                 Meet Your Purr-sonal Finance Advisors
               </h1>
-              <p className="text-lg text-catty-gray md:text-xl">
+              <p
+                className={`text-lg text-catty-gray md:text-xl ${
+                  animate ? "hero-description" : "opacity-0"
+                }`}
+              >
                 Our team of feline financial experts helps you track your
                 spending, save money, and make smarter financial decisions.
               </p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div
+              className={`flex flex-col gap-2 sm:flex-row ${
+                animate ? "hero-buttons" : "opacity-0"
+              }`}
+            >
               <Button
                 onClick={() => navigate(adviceCards[0].path)}
                 className="bg-catty-orange hover:bg-catty-brown text-white px-8 py-6"
@@ -76,7 +94,11 @@ export default function Hero() {
                 Get Started
               </Button>
             </div>
-            <div className="flex items-center gap-2 text-sm text-catty-gray">
+            <div
+              className={`flex items-center gap-2 text-sm text-catty-gray ${
+                animate ? "hero-stats" : "opacity-0"
+              }`}
+            >
               <div className="flex -space-x-2">
                 <div className="w-8 h-8 rounded-full bg-catty-orange flex items-center justify-center text-white text-xs">
                   🐱
