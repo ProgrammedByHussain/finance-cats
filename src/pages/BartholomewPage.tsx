@@ -33,6 +33,7 @@ export default function BartholomewPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSpeechMuted, setIsSpeechMuted] = useState(false);
 
+  // initial animation & cleanup
   useEffect(() => {
     setAnimate(true);
     return () => {
@@ -40,6 +41,7 @@ export default function BartholomewPage() {
     };
   }, []);
 
+  // play speech when results appear
   useEffect(() => {
     if (showResults && !isSpeechMuted) {
       let speechText = `Hello there! I'm Doctor Bartholomeow, your credit card expert. `;
@@ -51,9 +53,16 @@ export default function BartholomewPage() {
       } else {
         speechText += `I've analyzed your preferences and have some paw-some recommendations for you!`;
       }
-      playCatSpeech("bartholomeow", speechText);
+      playCatSpeech("bartholomew", speechText);
     }
   }, [showResults, isSpeechMuted, recommendations]);
+
+  // scroll to top when results are shown
+  useEffect(() => {
+    if (showResults) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [showResults]);
 
   const handleCategoryChange = (category: string) => {
     setSpendingCategories(prev => ({
@@ -86,7 +95,7 @@ export default function BartholomewPage() {
   const toggleSpeech = () => {
     if (isSpeechMuted) {
       setIsSpeechMuted(false);
-      if (showResults) playCatSpeech("bartholomeow");
+      if (showResults) playCatSpeech("bartholomew");
     } else {
       setIsSpeechMuted(true);
       stopAllSpeech();
@@ -104,7 +113,7 @@ export default function BartholomewPage() {
           {!showResults && (
             <div
               className={`flex items-center mb-8 ${
-                animate ? "bartholomew-appear" : "opacity-0"
+                animate ? "bartholomeow-appear" : "opacity-0"
               }`}
             >
               <img
@@ -145,7 +154,7 @@ export default function BartholomewPage() {
                 name="Dr. Bartholomeow"
                 degree="Ph.D., Quantitative Finance & Risk Management"
                 school="University of Oxford"
-                schoolLogo="/src/images/stanford_logo.png"
+                schoolLogo="/src/images/oxford_logo.png"
               />
               <div className="flex justify-center mt-4 mb-6">
                 <Button variant="ghost" size="icon" onClick={toggleSpeech}>
@@ -172,7 +181,7 @@ export default function BartholomewPage() {
               {/* form cards */}
               <Card
                 className={`mb-8 ${
-                  animate ? "bartholomew-card" : "opacity-0"
+                  animate ? "bartholomeow-card" : "opacity-0"
                 }`}
               >
                 <CardHeader>
@@ -200,7 +209,7 @@ export default function BartholomewPage() {
 
               <Card
                 className={`mb-8 ${
-                  animate ? "bartholomew-card" : "opacity-0"
+                  animate ? "bartholomeow-card" : "opacity-0"
                 }`}
                 style={{ animationDelay: "0.5s" }}
               >
@@ -267,10 +276,7 @@ export default function BartholomewPage() {
             <div>
               <div className="space-y-6">
                 {recommendations.map((card, idx) => (
-                  <CreditCardRecommendation
-                    key={idx}
-                    {...card}
-                  />
+                  <CreditCardRecommendation key={idx} {...card} />
                 ))}
               </div>
 

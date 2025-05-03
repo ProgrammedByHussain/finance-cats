@@ -55,6 +55,13 @@ export default function ClawdiaPage() {
     }
   }, [showResults, isSpeechMuted, apiData]);
 
+  // scroll to top when results are shown
+  useEffect(() => {
+    if (showResults) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [showResults]);
+
   const handleSubmit = async () => {
     playMeowSound();
     setIsLoading(true);
@@ -98,8 +105,8 @@ export default function ClawdiaPage() {
               <div className="flex flex-col items-center w-full">
                 <CatCredentialsPlaque
                   name="Dr. Clawdia"
-                  degree="Ph.D., Quantitative Finance & Risk Management"
-                  school="University of Oxford"
+                  degree="Ph.D., Credit Score Analytics & Portfolio Optimization, Stanford University"
+                  school="Stanford University"
                   schoolLogo="/src/images/stanford_logo.png"
                 />
                 <div className="flex justify-center mt-4">

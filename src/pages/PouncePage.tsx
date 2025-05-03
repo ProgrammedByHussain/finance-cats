@@ -22,21 +22,45 @@ export default function PouncePage() {
   const [error, setError] = useState<string | null>(null);
   const [isSpeechMuted, setIsSpeechMuted] = useState(false);
 
-  // --- EFFECT: trigger animation on mount ---
   useEffect(() => {
+    // Trigger animation after component mount
     setAnimate(true);
-  }, []);
 
-  // --- EFFECT: play advice on change (or when data arrives) ---
-  useEffect(() => {
-    if (!isSpeechMuted && catAdvice) {
-      playCatSpeech("pounce", catAdvice);
-    }
+    // Clean up speech when component unmounts
     return () => {
       stopAllSpeech();
     };
-  }, [catAdvice, isSpeechMuted]);
+  }, []);
 
+  // Play speech when financial data is available
+  useEffect(() => {
+    if (financialData && !isSpeechMuted) {
+      // Generate a custom message based on financial data
+      let speechText = `Meow there! Sir Pounce at your service. `;
+
+      if (financialData.spendingInsights) {
+        const { highestCategory, savingsTips } = financialData.spendingInsights;
+        speechText += `I've analyzed your spending habits and found some interesting patterns. `;
+        speechText += `Your highest spending category is ${highestCategory}. `;
+
+        if (savingsTips && savingsTips.length > 0) {
+          speechText += `Here's a tip: ${savingsTips[0]} `;
+        }
+
+        speechText += `Your current savings rate is ${financialData.savingsRate}%. `;
+
+        if (financialData.savingsRate < 20) {
+          speechText += `I recommend trying to save at least 20% of your income for better financial security.`;
+        } else {
+          speechText += `Great job on your savings! Keep up the good work!`;
+        }
+      } else {
+        speechText += `I've analyzed your spending patterns and have some suggestions to optimize your budget!`;
+      }
+
+      playCatSpeech("pounce", speechText);
+    }
+  }, [financialData, isSpeechMuted]);
   // --- HANDLER: upload CSV ---
   const handleFileUploaded = (data: any) => {
     if (!data) {
@@ -188,8 +212,6 @@ export default function PouncePage() {
         </div>
       </div>
 
-      {/* TEXT + VOICE ADVISOR */}
-      <CatAdvisor advice={catAdvice} />
 
       {/* FLOATING FLAVOR IMAGE */}
       {financialData && (
