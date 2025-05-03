@@ -12,6 +12,8 @@ import InvestmentDashboard from "@/components/InvestmentDashboard";
 import { getInvestmentRecommendations } from "@/services/geminiService";
 import { Loader2, AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import TalkingImage from "@/components/TalkingImage";
+
 import {
   playCatSpeech,
   stopAllSpeech,
@@ -197,10 +199,9 @@ export default function ClawdiaPage() {
         </div>
 
         <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
-          <img
-            src="/src/images/clawdia_ok.png"
-            alt="Dr. Clawdia"
-            className="w-64 h-64 object-contain transform scale-150"
+          <TalkingImage
+            imgIdle="/src/images/clawdia_ok.png"
+            imgTalking="/src/images/clawdia_talk.png"
           />
         </div>
       </div>
