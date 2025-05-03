@@ -162,7 +162,7 @@ export default function ClawdiaPage() {
               <div className="flex flex-col items-center w-full">
                 <CatCredentialsPlaque
                   name="Dr. Clawdia"
-                  degree="Ph.D., Credit Score Analytics & Portfolio Optimization, Stanford University"
+                  degree="Ph.D., Credit Score Analytics & Portfolio Optimization"
                   school="Stanford University"
                   schoolLogo="/images/stanford_logo.png"
                 />
