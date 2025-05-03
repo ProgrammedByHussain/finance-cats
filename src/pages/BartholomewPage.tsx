@@ -354,8 +354,8 @@ export default function BartholomewPage() {
       {showResults && (
         <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
           <TalkingImage
-            imgIdle="/public/images/barth_ok.png"
-            imgTalking="/public/images/barth_talk.png"
+            imgIdle="/images/barth_ok.png"
+            imgTalking="/images/barth_talk.png"
           />
         </div>
       )}
