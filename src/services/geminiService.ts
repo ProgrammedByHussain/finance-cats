@@ -58,15 +58,15 @@ export async function getCreditCardRecommendations(
   
   For each card, provide:
   1. The actual card name from a Canadian bank or issuer (with a cat pun in your description if possible, but keep the real card name)
-  2. A brief description (1 sentence)
-  3. 3 specific benefits that are accurate for this card and tailored to the user's preferences
+  2. A brief description (1 sentence, starting with the word "Offers")
+  3. 3 specific benefits that are accurate for this card and tailored to the user's preferences (each no more than 250 characters)
   4. The actual annual fee
   5. The accurate interest rate range
   
   Format your response as valid JSON with this structure:
   [
     {
-      "name": "Real Card Name (from Canadian issuer)",
+      "name": "Real Card Name (from Canadian issuer, don't include any *'s)",
       "description": "Card description",
       "benefits": ["Benefit 1", "Benefit 2", "Benefit 3"],
       "annualFee": "$X",
