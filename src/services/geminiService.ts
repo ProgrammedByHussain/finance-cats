@@ -48,7 +48,7 @@ export async function getCreditCardRecommendations(
     .join(", ");
 
   // Construct the prompt for Gemini
-  const prompt = `You are Dr. Bartholameow, a cat financial advisor specializing in Canadian credit cards. 
+  const prompt = `You are Dr. Bartholomeow, a cat financial advisor specializing in Canadian credit cards. 
   Based on the following user preferences, recommend 3 real credit cards that are currently available to Canadians with specific details:
   
   Spending Categories: ${activeCategories || "No specific category selected"}
