@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Volume2, VolumeX } from "lucide-react";
 import { CatCredentialsPlaque } from "@/components/CatCredentialsPlaque";
+import TalkingImage
+ from "@/components/TalkingImage";
 import {
   playCatSpeech,
   stopAllSpeech,
@@ -233,10 +235,9 @@ export default function PouncePage() {
       {/* FLOATING FLAVOR IMAGE */}
       {financialData && (
         <div className="fixed bottom-4 left-4 z-50 animate-in fade-in slide-in-from-bottom">
-          <img
-            src="/src/images/pounce_ok.png"
-            alt="Sir Pounce"
-            className="w-64 h-64 object-contain transform scale-150"
+          <TalkingImage
+            imgIdle="/src/images/pounce_ok.png"
+            imgTalking="/src/images/pounce_talk.png"
           />
         </div>
       )}
