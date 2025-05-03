@@ -112,7 +112,7 @@ export default function FileUpload({ onFileUploaded }: FileUploadProps) {
             <p className="text-xs text-center text-catty-gray">Uploading... {uploadProgress}%</p>
           </div>
         ) : (
-          <Button 
+          <Button
             onClick={handleUpload} 
             className="w-full bg-catty-orange hover:bg-catty-brown text-white"
             disabled={!file}
